@@ -1,6 +1,7 @@
 require "smartos/generators/version"
+require "smartos/generators/command"
 
-module Smartos
+module SmartOS
   module Generators
     # Your code goes here...
   end

@@ -3,11 +3,10 @@
 lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
 $LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
 
-require 'smartos'
-require 'smartos/command'
+require 'smartos/generators'
 
 args = ARGV.dup
 ARGV.clear
 command = args.shift.strip rescue 'help'
 
-SmartOS::Command.run(command, args)
+SmartOS::Generators::Command.run(command, args)
