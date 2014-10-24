@@ -5,7 +5,7 @@ require 'smartos/generators/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "smartos-generators"
-  spec.version       = Smartos::Generators::VERSION
+  spec.version       = SmartOS::Generators::VERSION
   spec.authors       = ["John Knott"]
   spec.email         = ["john.knott@gmail.com"]
   spec.summary       = %q{TODO: Write a short summary. Required.}
@@ -20,4 +20,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "pry"
+
+  spec.add_development_dependency "slop"
+  spec.add_development_dependency "highline"
 end

@@ -1,3 +1,5 @@
+require 'slop'
+require 'pry'
 require "smartos/generators/version"
 require "smartos/generators/command"
 
