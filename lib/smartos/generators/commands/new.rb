@@ -76,6 +76,7 @@ class New < SmartOS::Generators::Command
 
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
+        configure_virtual_machine(host_or_ip)
         break unless agree "\nFinished configuring this VM. Add another?"
       end
     else
@@ -95,7 +96,7 @@ class New < SmartOS::Generators::Command
         if ip.prefix == 32
           puts "\nPlease enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring private virtual network as Address: #{ip.address} "
+          puts "\nConfiguring private virtual network as Address: #{ip.address} "\
           "- Netmask: #{ip.netmask}".green
           return ip
         end
@@ -142,4 +143,44 @@ class New < SmartOS::Generators::Command
           host_or_ip : nil
     end
   end
+
+  def configure_virtual_machine(host)
+    SmartOS::GlobalZone.connect(host) do
+      installed = imgadm!('list -j')
+      if installed.size > 0
+        puts "Installed"
+      end
+      binding.pry
+      res = imgadm!('avail -j')
+      binding.pry
+    end
+    choose do |menu|
+      menu.prompt = "Please choose the dataset to base the VM on:"
+      menu.choice 'latest' do say("Good choice!") end
+      menu.choices(:python, :perl) do say("Not from around here, are you?") end
+    end
+  end
 end
+
+
+=begin
+
+Available Datasets
+-------------------
+1) Latest base64 14.2.0 (Zone, Already Installed)
+2) Latest standard64 14.2.0 (Zone)
+3) Latest debian 20141001 (KVM)
+4) Latest centos 20141001 (KVM)
+5) List all 56 Datasets
+=end
+
+
+
+
+
+
+
+
+
+
+
