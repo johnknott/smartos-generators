@@ -42,6 +42,12 @@ class New < SmartOS::Generators::Command
     puts "Creating New SmartOS Infrastructure Project: #{name}".green
     puts "At path: #{path}".green
 
+    begin
+      new_global_zone  
+    end while agree("Add another Global Zone?")
+  end
+
+  def new_global_zone
     loop do
       @hostname = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
       @info = SmartOS::GlobalZone.is_global_zone?(@hostname)
@@ -49,6 +55,5 @@ class New < SmartOS::Generators::Command
     end
 
     puts "Successfully connected to Global Zone #{@hostname} (#{@info})".green
-
   end
 end
