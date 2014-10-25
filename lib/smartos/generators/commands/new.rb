@@ -77,7 +77,7 @@ class New < SmartOS::Generators::Command
         if ip.prefix == 32
           puts "\nPlease enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring PVN as Address: #{ip.address} - Netmask: #{ip.netmask}".green
+          puts "\nConfiguring Private Virtual Network as Address: #{ip.address} - Netmask: #{ip.netmask}".green
           return ip
         end
       rescue
