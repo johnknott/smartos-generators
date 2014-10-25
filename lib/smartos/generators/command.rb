@@ -33,6 +33,10 @@ module SmartOS
 
       def self.usage(within_project)
         str = within_project ? USAGE_WITHIN_PROJECT : USAGE_OUTSIDE_PROJECT
+        strip_heredoc(str)
+      end
+
+      def self.strip_heredoc(str)
         str.gsub /^#{str[/\A\s*/]}/, ''
       end
 

@@ -9,6 +9,8 @@ include SmartOS::Generators
 args = ARGV.dup
 
 begin
+  raise NoCommandError unless args.size > 0
+  
   command = args.shift.strip
   within_project = File.exist?('Smartosfile')
 
@@ -19,6 +21,6 @@ begin
   end
 
   Command.run(command, args)
-rescue  UnknownCommandError, NoMethodError
+rescue  NoCommandError, UnknownCommandError
   puts Command.usage(within_project)
 end
