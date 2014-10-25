@@ -28,7 +28,7 @@ module SmartOS
       eos
 
       def self.run(command, args)
-        Object.const_get(command.capitalize).perform(args)
+        Object.const_get(command.capitalize).new.perform(args)
       end
 
       def self.usage(within_project)

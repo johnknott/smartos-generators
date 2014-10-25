@@ -1,6 +1,8 @@
 require 'slop'
 require 'pry'
 require 'colorize'
+require 'highline/import'
+require 'smartos'
 require "smartos/generators/version"
 require "smartos/generators/command"
 require "smartos/generators/exceptions"

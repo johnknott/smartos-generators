@@ -25,4 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "slop"
   spec.add_dependency "highline"
   spec.add_dependency "colorize"
+
+  spec.add_runtime_dependency "smartos"
 end
