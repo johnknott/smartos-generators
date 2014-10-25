@@ -2,7 +2,7 @@ require 'slop'
 require 'pry'
 require 'colorize'
 require 'highline/import'
-require 'ipaddr'
+require 'ipaddress'
 require 'smartos'
 require "smartos/generators/version"
 require "smartos/generators/command"

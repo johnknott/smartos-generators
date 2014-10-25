@@ -66,8 +66,14 @@ class New < SmartOS::Generators::Command
 
   def gather_pvn_vlan_details
     loop do
-      answer = ask "Please enter the IP range you'd like to set up your Private Virtual Network in CIDR notation (e.g. 10.0.0.1/8)"
-      Ipaddr.new(answer)
+      answer = ask "Please enter the IP range you'd like to set up your Private Virtual Network in CIDR notation (e.g. 10.0.0.1/24)"
+      begin
+        ip = IPAddress.parse(answer)
+        if ip.prefix == 32
+          puts "Please input a range. You inputed a single IP address."
+        break if 
+      rescue
+      end
     end
   end
 
