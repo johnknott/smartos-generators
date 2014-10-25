@@ -10,8 +10,15 @@ args = ARGV.dup
 
 begin
   command = args.shift.strip
-  raise UnknownCommandError unless %w{new up down console wizard}.include?(command)
+  within_project = File.exist?('Smartosfile')
+
+  if within_project
+    raise UnknownCommandError unless %w{up down console wizard}.include?(command)
+  else
+    raise UnknownCommandError unless command == 'new'
+  end
+
   Command.run(command, args)
 rescue  UnknownCommandError, NoMethodError
-  puts Command.usage
+  puts Command.usage(within_project)
 end

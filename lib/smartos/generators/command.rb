@@ -2,7 +2,7 @@ module SmartOS
   module Generators
     class Command
 
-      USAGE = <<-eos
+      USAGE_OUTSIDE_PROJECT = <<-eos
       Usage:
         smartos <command> [options]
 
@@ -11,6 +11,16 @@ module SmartOS
 
       Commands:
         new                     # Create a new SmartOS infrastructure project.
+      eos
+
+      USAGE_WITHIN_PROJECT = <<-eos
+      Usage:
+        smartos <command> [options]
+
+        For in depth help run:
+        smartos <command> --help
+
+      Commands:
         up                      # Create and configure machines you have defined in your project.
         down                    # Destroy all or part of your infrastructure.
         console                 # Start an interactive ruby console in the context of a Global Zone.
@@ -21,8 +31,9 @@ module SmartOS
         Object.const_get(command.capitalize).perform(args)
       end
 
-      def self.usage
-        USAGE.gsub /^#{USAGE[/\A\s*/]}/, ''
+      def self.usage(within_project)
+        str = within_project ? USAGE_WITHIN_PROJECT : USAGE_OUTSIDE_PROJECT
+        str.gsub /^#{str[/\A\s*/]}/, ''
       end
 
     end
