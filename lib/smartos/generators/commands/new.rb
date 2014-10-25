@@ -42,18 +42,42 @@ class New < SmartOS::Generators::Command
     puts "Creating New SmartOS Infrastructure Project: #{name}".green
     puts "At path: #{path}".green
 
-    begin
+    loop do
       new_global_zone  
-    end while agree("Add another Global Zone?")
+      break unless agree("Add another Global Zone?")
+    end
   end
 
   def new_global_zone
+    host_or_ip = info = nil
+
     loop do
-      @hostname = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
-      @info = SmartOS::GlobalZone.is_global_zone?(@hostname)
-      break if @info
+      host_or_ip = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
+      info = SmartOS::GlobalZone.is_global_zone?(host_or_ip)
+      break if info
     end
 
-    puts "Successfully connected to Global Zone #{@hostname} (#{@info})".green
+    puts "Successfully connected to Global Zone #{host_or_ip} (#{info})".green
+
+    # Gather information
+    hostname_to_set = gather_hostname(host_or_ip)
+    local_net_range = gather_pvn_vlan_details
+  end
+
+  def gather_pvn_vlan_details
+    loop do
+      answer = ask "Please enter the IP range you'd like to set up your Private Virtual Network in CIDR notation (e.g. 10.0.0.1/8)"
+      Ipaddr.new(answer)
+    end
+  end
+
+  def gather_hostname(hostname)
+    is_ip = !!IPAddr.new(hostname) rescue false
+    hostname_to_set = nil
+    if is_ip
+      hostname_to_set  = ask "Please enter the hostname for the Global Zone - this will be set on boot:"
+    else
+      hostname_to_set  = agree("Do you wish to set the hostname to '#{hostname}' on boot?") ? hostname : nil
+    end
   end
 end
