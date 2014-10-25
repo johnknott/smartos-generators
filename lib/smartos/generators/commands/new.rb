@@ -1,4 +1,9 @@
 class New < SmartOS::Generators::Command
+
+  # Creates a new SmartOS infrastructure project.
+  # Every Command must imnplement 'perform'.
+  # @param args arguments to be parsed
+  # @return [void]
   def perform(args) 
     opts = Slop.parse!(args) do
       banner Command.strip_heredoc <<-eos
@@ -31,6 +36,9 @@ class New < SmartOS::Generators::Command
 
   end
 
+  # Creates a new SmartOS infrastructure project.
+  # @param name [String] String containing a name for the project.
+  # @return [void]
   def new_project(name)
     path = File.expand_path(name)
     if Dir.exists?(path)
@@ -39,17 +47,21 @@ class New < SmartOS::Generators::Command
     end      
 
     system 'mkdir', '-p', path
-    puts "Creating New SmartOS Infrastructure Project: #{name}".green
+    puts "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
     puts "At path: #{path}".green
 
-    loop do
-      new_global_zone  
-      break unless agree("\nFinished configuring this Global Zone. Add another?")
-    end
+    #loop do
+      new_global_zone
+      #break unless agree("\nFinished configuring this Global Zone. Add another?")
+    #end
 
-    puts "\nYou have now configured your SmartOS virtual infrastructure. Inspect it, then run 'smartos up' to build it!".blue
+    puts "\nYou have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
+         "'smartos up' to build it!".blue
   end
 
+
+  # Creates a new SmartOS Global Zone definition
+  # @return [void]
   def new_global_zone
     host_or_ip = info = nil
 
@@ -64,20 +76,34 @@ class New < SmartOS::Generators::Command
     puts "#{info}\n".green
 
     # Gather information
-    hostname_to_set = gather_hostname(host_or_ip)
-    local_net_range = gather_pvn_vlan_details
-    internet_net_range = gather_internet_vlan_details
+    hostname_to_set     = gather_hostname(host_or_ip)
+    local_net_range     = gather_pvn_vlan_details
+    internet_net_range  = gather_internet_vlan_details
+
+    if agree "\nDo you want to create your Virtual Machine definitions now?"
+      loop do
+        break unless agree "\nFinished configuring this VM. Add another?"
+      end
+    else
+      puts "\nSkipping Machine definitions."
+    end
+
   end
 
+
+  # Asks the user to provide network details for their private virtual network.
+  # @return [IPAddress] containing the IP/Subnet information that ther user provided.
   def gather_pvn_vlan_details
     loop do
-      answer = ask "\nPlease enter the IP range you'd like to set up your Private Virtual Network in CIDR notation (e.g. 10.0.0.1/24)"
+      answer = ask "\nPlease enter the IP range you'd like to set up your private virtual network "\
+                   "in CIDR notation (e.g. 10.0.0.1/24)"
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
           puts "\nPlease enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring Private Virtual Network as Address: #{ip.address} - Netmask: #{ip.netmask}".green
+          puts "\nConfiguring private virtual network as Address: #{ip.address} - Netmask: "\
+               "#{ip.netmask}".green
           return ip
         end
       rescue
@@ -86,15 +112,19 @@ class New < SmartOS::Generators::Command
     end
   end
 
+  # Asks the user to provide network details for their internet facing subnet.
+  # @return [IPAddress] containing the IP/Subnet information that ther user provided.
   def gather_internet_vlan_details
     loop do
-      answer = ask "\nPlease enter the IP range you'd like to use for your Internet-facing Network in CIDR notation (e.g. 158.251.218.81/29)"
+      answer = ask "\nPlease enter the IP range you'd like to use for your Internet-facing Network"\
+                   " in CIDR notation (e.g. 158.251.218.81/29)"
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
           puts "\nPlease enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring internet-facing network as Address: #{ip.address} - Netmask: #{ip.netmask}".green
+          puts "\nConfiguring internet-facing network as Address: #{ip.address} - Netmask: "\
+               "#{ip.netmask}".green
           return ip
         end
       rescue
@@ -103,13 +133,18 @@ class New < SmartOS::Generators::Command
     end
   end
 
-  def gather_hostname(hostname)
-    is_ip = !!IPAddr.new(hostname) rescue false
+  # Asks the user for a hostname and whether to set it when the GZ boots.
+  # @param host_or_ip [String] String containing a hostname or IP address.
+  # @return [String] String containing hostname to set on boot on the GZ or nil.
+  def gather_hostname(host_or_ip)
+    is_ip = !!IPAddr.new(host_or_ip) rescue false
     hostname_to_set = nil
     if is_ip
-      hostname_to_set  = ask "Please enter the hostname for the Global Zone - this will be set on boot:"
+      hostname_to_set =
+        ask "Please enter the hostname for the Global Zone - this will be set on boot:"
     else
-      hostname_to_set  = agree("Do you wish to set the hostname to '#{hostname}' on boot?") ? hostname : nil
+      hostname_to_set =
+        agree("Do you wish to set the hostname to '#{host_or_ip}' on boot?") ? host_or_ip : nil
     end
   end
 end
