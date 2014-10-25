@@ -4,5 +4,16 @@ lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
 $LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
 
 require 'smartos/generators'
+include SmartOS::Generators
 
-SmartOS::Generators::Command.run
+args = ARGV.dup
+
+begin
+  command = args.shift.strip
+  raise UnknownCommandError unless %w{new up down console wizard}.include?(command)
+  Command.run(command, args)
+rescue  UnknownCommandError
+  puts Command.usage
+rescue NoMethodError
+  puts Command.usage
+end

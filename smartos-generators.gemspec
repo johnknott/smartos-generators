@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = SmartOS::Generators::VERSION
   spec.authors       = ["John Knott"]
   spec.email         = ["john.knott@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{A script that helps to create and maintain a SmartOS based infrastructure.}
+  #spec.description   = %q{}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "pry"
 
-  spec.add_development_dependency "slop"
-  spec.add_development_dependency "highline"
+  spec.add_dependency "slop"
+  spec.add_dependency "highline"
+  spec.add_dependency "colorize"
 end

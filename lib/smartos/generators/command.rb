@@ -1,52 +1,33 @@
-require 'highline/import'
+Dir[File.join(File.dirname(__FILE__), 'commands', '*.rb')].each {|file| require_relative file }
 
 module SmartOS
   module Generators
     class Command
-      def self.run
-        
-        opts = Slop.parse!(ARGV, help: true) do
-          banner 'Usage: smartos [options]'
+      include SmartOS::Generators::Commands
 
-          on 'name', 'Your name'
-          on 'p', 'password', 'An optional password', argument: :optional
-          on 'v', 'verbose', 'Enable verbose mode'
-        end
+      USAGE = <<-eos
+      Usage:
+        smartos <command> [options]
 
-      if ARGV!= 1
-        puts opts.to_s
+        For in depth help run:
+        smartos <command> --help
+
+      Commands:
+        new                     # Create a new SmartOS infrastructure project.
+        up                      # Create and configure machines you have defined in your project.
+        down                    # Destroy all or part of your infrastructure.
+        console                 # Start an interactive ruby console in the context of a Global Zone.
+        wizard                  # Start the wizard tool. Useful for one off tasks such as migrating VMs.
+      eos
+
+      def self.run(command, args)
+        self.send(command, args)
       end
 
+      def self.usage
+        USAGE.gsub /^#{USAGE[/\A\s*/]}/, ''
       end
+
     end
   end
 end
-
-
-
-
-
-
-=begin
-puts "#{command} (#{args.join(',')})"
-        ask("Company?  ") { |q| q.default = "none" }
-        puts ask("Interests?  (comma sep list)  ", lambda { |str| str.split(/,\s*/) })
-        say("This should be <%= color('bold', BOLD, :blue) %>!")
-
-        say("\nYou can even build shells...")
-        loop do
-          choose do |menu|
-            menu.layout = :menu_only
-
-            menu.shell  = true
-
-            menu.choice(:load, "Load a file.") do |command, details|
-              say("Loading file with options:  #{details}...")
-            end
-            menu.choice(:save, "Save a file.") do |command, details|
-              say("Saving file with options:  #{details}...")
-            end
-            menu.choice(:quit, "Exit program.") { exit }
-          end
-        end
-=end
