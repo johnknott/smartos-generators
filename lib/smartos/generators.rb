@@ -5,6 +5,7 @@ require 'highline/import'
 require 'ipaddress'
 require 'smartos'
 require 'smartos/generators/version'
+require 'smartos/generators/extensions'
 require 'smartos/generators/command'
 require 'smartos/generators/exceptions'
 Gem.find_files('smartos/generators/commands/**/*.rb').each { |path| require path }

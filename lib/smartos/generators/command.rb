@@ -35,9 +35,6 @@ module SmartOS
         strip_heredoc(str)
       end
 
-      def self.strip_heredoc(str)
-        str.gsub(/^#{str[/\A\s*/]}/, '')
-      end
     end
   end
 end
