@@ -1,17 +1,5 @@
-module SmartOS
-  module Generators
-    module Commands
-
-      def self.included base
-        base.extend ClassMethods
-      end
-
-      module ClassMethods
-        def console(args)
-          puts "Console!!!! #{args}"
-        end
-      end
-
-    end
+class Console < SmartOS::Generators::Command
+  def self.perform(args) 
+    puts "Console!!!! #{args}"
   end
 end

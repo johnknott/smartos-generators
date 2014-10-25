@@ -1,9 +1,6 @@
-Dir[File.join(File.dirname(__FILE__), 'commands', '*.rb')].each {|file| require_relative file }
-
 module SmartOS
   module Generators
     class Command
-      include SmartOS::Generators::Commands
 
       USAGE = <<-eos
       Usage:
@@ -21,7 +18,7 @@ module SmartOS
       eos
 
       def self.run(command, args)
-        self.send(command, args)
+        Object.const_get(command.capitalize).perform(args)
       end
 
       def self.usage

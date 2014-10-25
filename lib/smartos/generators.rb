@@ -4,8 +4,4 @@ require 'colorize'
 require "smartos/generators/version"
 require "smartos/generators/command"
 require "smartos/generators/exceptions"
-
-module SmartOS
-  module Generators
-  end
-end
+Gem.find_files("smartos/generators/commands/**/*.rb").each { |path| require path }

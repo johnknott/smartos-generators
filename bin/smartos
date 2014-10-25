@@ -12,8 +12,6 @@ begin
   command = args.shift.strip
   raise UnknownCommandError unless %w{new up down console wizard}.include?(command)
   Command.run(command, args)
-rescue  UnknownCommandError
-  puts Command.usage
-rescue NoMethodError
+rescue  UnknownCommandError, NoMethodError
   puts Command.usage
 end
