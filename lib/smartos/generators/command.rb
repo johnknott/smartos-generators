@@ -1,7 +1,6 @@
 module SmartOS
   module Generators
     class Command
-
       USAGE_OUTSIDE_PROJECT = <<-eos
       Usage:
         smartos <command> [options]
@@ -21,10 +20,10 @@ module SmartOS
         smartos <command> --help
 
       Commands:
-        up                      # Create and configure machines you have defined in your project.
-        down                    # Destroy all or part of your infrastructure.
-        console                 # Start an interactive ruby console in the context of a Global Zone.
-        wizard                  # Start the wizard tool. Useful for one off tasks such as migrating VMs.
+        up                  # Create and configure machines you have defined in your project.
+        down                # Destroy all or part of your infrastructure.
+        console             # Start an interactive ruby console in the context of a Global Zone.
+        wizard              # Start the wizard tool. Useful for one off tasks such as migrating VMs.
       eos
 
       def self.run(command, args)
@@ -37,9 +36,8 @@ module SmartOS
       end
 
       def self.strip_heredoc(str)
-        str.gsub /^#{str[/\A\s*/]}/, ''
+        str.gsub(/^#{str[/\A\s*/]}/, '')
       end
-
     end
   end
 end

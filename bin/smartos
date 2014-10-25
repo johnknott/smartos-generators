@@ -9,15 +9,15 @@ include SmartOS::Generators
 args = ARGV.dup
 
 begin
-  raise NoCommandError unless args.size > 0
-  
+  fail NoCommandError unless args.size > 0
+
   command = args.shift.strip
   within_project = File.exist?('Smartosfile')
 
   if within_project
-    raise UnknownCommandError unless %w{up down console wizard}.include?(command)
+    fail UnknownCommandError unless %w(up down console wizard).include?(command)
   else
-    raise UnknownCommandError unless command == 'new'
+    fail UnknownCommandError unless command == 'new'
   end
 
   Command.run(command, args)
