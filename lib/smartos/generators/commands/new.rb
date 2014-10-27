@@ -145,20 +145,44 @@ class New < SmartOS::Generators::Command
   end
 
   def configure_virtual_machine(host)
+
+    res = []
     SmartOS::GlobalZone.connect(host) do
-      installed = imgadm!('list -j')
-      if installed.size > 0
-        puts "Installed"
-      end
-      binding.pry
       res = imgadm!('avail -j')
-      binding.pry
     end
+
+
+    base64 = latest_of_type(res, ->(name){name == 'base64'})
+    standard64 = latest_of_type(res, ->(name){name == 'standard64'})
+    debian = latest_of_type(res, ->(name){/debian.*/.match(name)})
+    centos = latest_of_type(res, ->(name){/centos.*/.match(name)})
+
+    say "Please choose the dataset to base the VM on:"
     choose do |menu|
-      menu.prompt = "Please choose the dataset to base the VM on:"
-      menu.choice 'latest' do say("Good choice!") end
-      menu.choices(:python, :perl) do say("Not from around here, are you?") end
+      menu.choice dataset_description(base64)
+      menu.choice dataset_description(standard64)
+      menu.choice dataset_description(debian)
+      menu.choice dataset_description(centos)
+      
+      menu.choice "Choose from all #{res.length} Datasets" do
+        choose do |menu|
+          res.reverse_each do |dataset|
+            menu.choice dataset_description(dataset)
+          end
+        end
+      end
+
     end
+  end
+
+  private
+  def dataset_description(dataset)
+    d = dataset['manifest']
+    "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']}"
+  end
+
+  def latest_of_type(res, proc)
+    res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
   end
 end
 
