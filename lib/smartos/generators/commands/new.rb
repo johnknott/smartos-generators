@@ -159,10 +159,10 @@ class New < SmartOS::Generators::Command
 
     say "Please choose the dataset to base the VM on:"
     choose do |menu|
-      menu.choice dataset_description(base64)
-      menu.choice dataset_description(standard64)
-      menu.choice dataset_description(debian)
-      menu.choice dataset_description(centos)
+      menu.choice dataset_description(base64, '(Latest base64)')
+      menu.choice dataset_description(standard64, '(Latest standard64)')
+      menu.choice dataset_description(debian, '(Latest Debian)')
+      menu.choice dataset_description(centos, '(Latest CentOS)')
       
       menu.choice "Choose from all #{res.length} Datasets" do
         choose do |menu|
@@ -176,9 +176,9 @@ class New < SmartOS::Generators::Command
   end
 
   private
-  def dataset_description(dataset)
+  def dataset_description(dataset, note = nil)
     d = dataset['manifest']
-    "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']}"
+    "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']} #{note.blue if note}"
   end
 
   def latest_of_type(res, proc)
@@ -196,6 +196,8 @@ Available Datasets
 3) Latest debian 20141001 (KVM)
 4) Latest centos 20141001 (KVM)
 5) List all 56 Datasets
+
+Add option to change dataset source
 =end
 
 
