@@ -157,22 +157,32 @@ class New < SmartOS::Generators::Command
     debian = latest_of_type(res, ->(name){/debian.*/.match(name)})
     centos = latest_of_type(res, ->(name){/centos.*/.match(name)})
 
+    chosen = nil
     say "Please choose the dataset to base the VM on:"
-    choose do |menu|
-      menu.choice dataset_description(base64, '(Latest base64)')
-      menu.choice dataset_description(standard64, '(Latest standard64)')
-      menu.choice dataset_description(debian, '(Latest Debian)')
-      menu.choice dataset_description(centos, '(Latest CentOS)')
+     chosen = choose do |menu|
+      menu.select_by = :index
+      menu.choice dataset_description(base64, '(Latest base64)') do base64 end
+      menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
+      menu.choice dataset_description(debian, '(Latest debian)') do debian end
+      menu.choice dataset_description(centos, '(Latest centos)') do centos end
       
       menu.choice "Choose from all #{res.length} Datasets" do
         choose do |menu|
           res.reverse_each do |dataset|
-            menu.choice dataset_description(dataset)
+            menu.choice dataset_description(dataset) do dataset end
           end
         end
       end
-
     end
+
+    ask 'Machine Alias?'
+    ask "Machine Hostname"
+    ask 'Maximum memory this machine should use?'
+    ask "Maximum disk space this machine should use?"
+    ask "Do you want to copy over your public SSH key to allow passwordless login?"
+    #Openstruct.new{dataset: chosen,}
+    #binding.pry
+
   end
 
   private
