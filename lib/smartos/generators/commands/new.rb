@@ -74,6 +74,12 @@ class New < SmartOS::Generators::Command
     local_net_range     = gather_pvn_vlan_details
     internet_net_range  = gather_internet_vlan_details
 
+    say "Please choose which dataset repository to use:"
+    chosen = choose do |menu|
+      menu.choice "https://datasets.at/"
+      menu.choice "https://images.joyent.com"
+    end
+
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
         configure_virtual_machine(host_or_ip)
@@ -175,8 +181,8 @@ class New < SmartOS::Generators::Command
       end
     end
 
-    ask 'Machine Alias?'
-    ask "Machine Hostname"
+    ask 'Enter an Alias for this machine: i.e. web'
+    ask "Enter a hostname for this machine:"
     ask 'Maximum memory this machine should use?'
     ask "Maximum disk space this machine should use?"
     ask "Do you want to copy over your public SSH key to allow passwordless login?"
