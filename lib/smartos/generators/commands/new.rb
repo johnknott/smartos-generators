@@ -70,19 +70,17 @@ class New < SmartOS::Generators::Command
     puts "#{info}\n".green
 
     # Gather information
-    hostname_to_set     = gather_hostname(host_or_ip)
-    local_net_range     = gather_pvn_vlan_details
-    internet_net_range  = gather_internet_vlan_details
+    gz_info = OpenStruct.new(
+      gz_host:            host_or_ip, 
+      hostname:           gather_hostname(host_or_ip),
+      local_net_range:    gather_pvn_vlan_details,
+      internet_net_range: gather_internet_vlan_details,
+      dataset_repository: gather_repository)
 
-    say "Please choose which dataset repository to use:"
-    chosen = choose do |menu|
-      menu.choice "https://datasets.at/"
-      menu.choice "https://images.joyent.com"
-    end
 
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
-        configure_virtual_machine(host_or_ip)
+        configure_virtual_machine(gz_info)
         break unless agree "\nFinished configuring this VM. Add another?"
       end
     else
@@ -150,10 +148,20 @@ class New < SmartOS::Generators::Command
     end
   end
 
-  def configure_virtual_machine(host)
+  # Asks the user for a dataset repository to use. This will be set when when the GZ boots.
+  # @return [String] String containing URL of the dataset repository to set.
+  def gather_repository
+    say "Please choose which dataset repository to use:"
+    choose do |menu|
+      menu.choice "https://datasets.at/"
+      menu.choice "https://images.joyent.com"
+    end
+  end
+
+  def configure_virtual_machine(gz_info)
 
     res = []
-    SmartOS::GlobalZone.connect(host) do
+    SmartOS::GlobalZone.connect(gz_info.gz_host) do
       res = imgadm!('avail -j')
     end
 
@@ -167,10 +175,10 @@ class New < SmartOS::Generators::Command
     say "Please choose the dataset to base the VM on:"
      chosen = choose do |menu|
       menu.select_by = :index
-      menu.choice dataset_description(base64, '(Latest base64)') do base64 end
-      menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
-      menu.choice dataset_description(debian, '(Latest debian)') do debian end
-      menu.choice dataset_description(centos, '(Latest centos)') do centos end
+      menu.choice dataset_description(base64, '(Latest base64)')          do base64 end
+      menu.choice dataset_description(standard64, '(Latest standard64)')  do standard64 end
+      menu.choice dataset_description(debian, '(Latest debian)')          do debian end
+      menu.choice dataset_description(centos, '(Latest centos)')          do centos end
       
       menu.choice "Choose from all #{res.length} Datasets" do
         choose do |menu|
@@ -181,11 +189,13 @@ class New < SmartOS::Generators::Command
       end
     end
 
-    ask 'Enter an Alias for this machine: i.e. web'
-    ask "Enter a hostname for this machine:"
-    ask 'Maximum memory this machine should use?'
-    ask "Maximum disk space this machine should use?"
-    ask "Do you want to copy over your public SSH key to allow passwordless login?"
+    
+    domain = PublicSuffix.parse(gz_info.hostname).domain
+    machine_alias = ask "\nEnter an Alias for this machine: i.e. web"
+    ask "\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
+    ask "\nMaximum memory this machine should use?" + " (2GB)".blue
+    ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
+    ask "\nDo you want to copy over your public SSH key to allow passwordless login?" + " (YES)".blue
     #Openstruct.new{dataset: chosen,}
     #binding.pry
 
