@@ -78,9 +78,10 @@ class New < SmartOS::Generators::Command
       dataset_repository: gather_repository)
 
 
+    vm_definitions = []
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
-        configure_virtual_machine(gz_info)
+        vm_definitions << configure_virtual_machine(gz_info)
         break unless agree "\nFinished configuring this VM. Add another?"
       end
     else
