@@ -1,11 +1,11 @@
 class New < SmartOS::Generators::Command
   # Creates a new SmartOS infrastructure project.
-  # Every Command must imnplement 'perform'.
+  # Every Command must implement 'perform'.
   # @param args arguments to be parsed
   # @return [void]
   def perform(args)
     opts = Slop.parse!(args) do
-      banner (<<-eos
+      banner strip_indent(<<-eos
       Usage:
         smartos new <name>
 
@@ -20,7 +20,7 @@ class New < SmartOS::Generators::Command
 
         You can then create this infrastructure with the 'smartos up' command.
       eos
-      ).strip_indent
+      )
 
       on 'v', 'verbose', 'Enable verbose mode'
     end
@@ -81,7 +81,7 @@ class New < SmartOS::Generators::Command
 
     # Gather information
     gz_info = OpenStruct.new(
-      gz_host:            host_or_ip, 
+      gz_host:            host_or_ip,
       hostname:           gather_hostname(host_or_ip),
       local_net_range:    gather_pvn_vlan_details,
       internet_net_range: gather_internet_vlan_details,
@@ -101,13 +101,29 @@ class New < SmartOS::Generators::Command
     gz_info
   end
 
+  # Asks the user for a hostname and whether to set it when the GZ boots.
+  # @param host_or_ip [String] String containing a hostname or IP address.
+  # @return [String] String containing hostname to set on boot on the GZ or nil.
+  def gather_hostname(host_or_ip)
+    is_ip = !!IPAddr.new(host_or_ip) rescue false
+    hostname_to_set = nil
+    if is_ip
+      hostname_to_set =
+        ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
+    else
+      hostname_to_set =
+        ask("Please enter the hostname for the Global Zone - this will be set on boot:" +
+            " |#{host_or_ip}|".blue){|q|q.default = host_or_ip}
+    end
+  end
+
   # Asks the user to provide network details for their private virtual network.
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_pvn_vlan_details
     loop do
       answer = ask\
         "\nPlease enter the IP range you'd like to set up your private virtual network in CIDR "\
-        'notation (e.g. 10.0.0.1/24)'
+        'notation:' + " |10.0.0.20/24|".blue
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
@@ -145,26 +161,10 @@ class New < SmartOS::Generators::Command
     end
   end
 
-  # Asks the user for a hostname and whether to set it when the GZ boots.
-  # @param host_or_ip [String] String containing a hostname or IP address.
-  # @return [String] String containing hostname to set on boot on the GZ or nil.
-  def gather_hostname(host_or_ip)
-    is_ip = !!IPAddr.new(host_or_ip) rescue false
-    hostname_to_set = nil
-    if is_ip
-      hostname_to_set =
-        ask 'Please enter the hostname for the Global Zone - this will be set on boot:'
-    else
-      hostname_to_set =
-        agree("Do you wish to set the hostname to '#{host_or_ip}' on boot?") ?
-          host_or_ip : nil
-    end
-  end
-
   # Asks the user for a dataset repository to use. This will be set when when the GZ boots.
   # @return [String] String containing URL of the dataset repository to set.
   def gather_repository
-    say "Please choose which dataset repository to use:"
+    say "Please choose which dataset repository to use:" + " |https://datasets.at|".blue
     choose do |menu|
       menu.choice "https://datasets.at/"
       menu.choice "https://images.joyent.com"
@@ -192,7 +192,7 @@ class New < SmartOS::Generators::Command
       menu.choice dataset_description(standard64, '(Latest standard64)')  do standard64 end
       menu.choice dataset_description(debian, '(Latest debian)')          do debian end
       menu.choice dataset_description(centos, '(Latest centos)')          do centos end
-      
+
       menu.choice "Choose from all #{res.length} Datasets" do
         choose do |menu|
           res.reverse_each do |dataset|
@@ -202,15 +202,15 @@ class New < SmartOS::Generators::Command
       end
     end
 
-    
+
     domain = PublicSuffix.parse(gz_info.hostname).domain
-    machine_alias = ask "\nEnter an Alias for this machine: i.e. web"
-    hostname = ask "\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
+    machine_alias = ask("\nEnter an Alias for this machine: i.e. web" {}
+    hostname = ask("\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
     hostname = "#{machine_alias}.#{domain}" if hostname.empty?
-    if agree "\nDoes this machine need an Internet facing IP address?"
-      ask "\nPlease enter the internbet facing IP you want to use:"
+    if agree("\nDoes this machine need an Internet facing IP address?" + " |no|".blue){|q| q.default = 'no'}
+      ask("\nPlease enter the internet facing IP you want to use:" + "||"){|q| q.default = gz_info.get_next_free_ip}
     end
-    #ask "\nMaximum memory this machine should use?" + " (2GB)".blue
+    ask("\nMaximum memory this machine should use?" + " |(2GB)|".blue) {|q| q.default = 'no'}
     #ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
     #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
     OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
