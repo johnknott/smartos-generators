@@ -207,6 +207,9 @@ class New < SmartOS::Generators::Command
     machine_alias = ask "\nEnter an Alias for this machine: i.e. web"
     hostname = ask "\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
     hostname = "#{machine_alias}.#{domain}" if hostname.empty?
+    if agree "\nDoes this machine need an Internet facing IP address?"
+      ask "\nPlease enter the internbet facing IP you want to use:"
+    end
     #ask "\nMaximum memory this machine should use?" + " (2GB)".blue
     #ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
     #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
