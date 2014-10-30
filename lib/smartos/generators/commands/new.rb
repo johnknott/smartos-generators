@@ -173,16 +173,17 @@ class New < SmartOS::Generators::Command
 
   def configure_virtual_machine(gz_info)
 
-    res = []
-    SmartOS::GlobalZone.connect(gz_info.gz_host) do
-      res = imgadm!('avail -j')
+    unless @res
+      SmartOS::GlobalZone.connect(gz_info.gz_host) do
+        @res = imgadm!('avail -j')
+      end
     end
 
 
-    base64 = latest_of_type(res, ->(name){name == 'base64'})
-    standard64 = latest_of_type(res, ->(name){name == 'standard64'})
-    debian = latest_of_type(res, ->(name){/debian.*/.match(name)})
-    centos = latest_of_type(res, ->(name){/centos.*/.match(name)})
+    base64 = latest_of_type(@res, ->(name){name == 'base64'})
+    standard64 = latest_of_type(@res, ->(name){name == 'standard64'})
+    debian = latest_of_type(@res, ->(name){/debian.*/.match(name)})
+    centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
 
     chosen = nil
     say "Please choose the dataset to base the VM on:"
@@ -193,25 +194,25 @@ class New < SmartOS::Generators::Command
       menu.choice dataset_description(debian, '(Latest debian)')          do debian end
       menu.choice dataset_description(centos, '(Latest centos)')          do centos end
 
-      menu.choice "Choose from all #{res.length} Datasets" do
+      menu.choice "Choose from all #{@res.length} Datasets" do
         choose do |menu|
-          res.reverse_each do |dataset|
+          @res.reverse_each do |dataset|
             menu.choice dataset_description(dataset) do dataset end
           end
         end
       end
     end
 
-
     domain = PublicSuffix.parse(gz_info.hostname).domain
     machine_alias = ask("\nEnter an Alias for this machine: i.e. web" {}
-    hostname = ask("\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
+    hostname_guess = "#{machine_alias}.#{domain}"
+    hostname = ask("\nEnter a hostname for this machine:" + " |#{hostname_guess}|".blue){|q| q.default = hostname_guess}
     hostname = "#{machine_alias}.#{domain}" if hostname.empty?
     if agree("\nDoes this machine need an Internet facing IP address?" + " |no|".blue){|q| q.default = 'no'}
-      ask("\nPlease enter the internet facing IP you want to use:" + "||"){|q| q.default = gz_info.get_next_free_ip}
+      ask("\nPlease enter the internet facing IP you want to use:" + "||".blue){|q| q.default = gz_info.get_next_free_ip}
     end
-    ask("\nMaximum memory this machine should use?" + " |(2GB)|".blue) {|q| q.default = 'no'}
-    #ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
+    ask("\nMaximum memory this machine should use?" + " |(2GB)|".blue) {|q| q.default = '2GB'}
+    ask "\nMaximum disk space this machine should use?" + "  |20GB|".blue {|q| q.default = '20GB'}
     #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
     OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
   end
