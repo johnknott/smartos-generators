@@ -43,11 +43,21 @@ class New < SmartOS::Generators::Command
       exit
     end
 
-    system 'mkdir', '-p', path
-    puts "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
-    puts "At path: #{path}".green
+    #system 'mkdir', '-p', path
+    #puts "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
+    #puts "At path: #{path}".green
 
-    zone = new_global_zone
+    gz_info = new_global_zone
+
+    puts
+
+    table = Terminal::Table.new do |t|
+      gz_info.vm_definitions.each do |vm|
+        t << [vm.machine_alias, vm.hostname, vm.dataset['name'], vm.dataset['version'], vm.dataset['os']]
+      end
+    end
+
+    puts table
 
     puts "\nYou have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
          "'smartos up' to build it!".blue
@@ -75,18 +85,20 @@ class New < SmartOS::Generators::Command
       hostname:           gather_hostname(host_or_ip),
       local_net_range:    gather_pvn_vlan_details,
       internet_net_range: gather_internet_vlan_details,
-      dataset_repository: gather_repository)
+      dataset_repository: gather_repository,
+      vm_definitions:     [])
 
 
-    vm_definitions = []
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
-        vm_definitions << configure_virtual_machine(gz_info)
+        gz_info.vm_definitions << configure_virtual_machine(gz_info)
         break unless agree "\nFinished configuring this VM. Add another?"
       end
     else
       puts "\nSkipping Machine definitions."
     end
+
+    gz_info
   end
 
   # Asks the user to provide network details for their private virtual network.
@@ -193,13 +205,12 @@ class New < SmartOS::Generators::Command
     
     domain = PublicSuffix.parse(gz_info.hostname).domain
     machine_alias = ask "\nEnter an Alias for this machine: i.e. web"
-    ask "\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
-    ask "\nMaximum memory this machine should use?" + " (2GB)".blue
-    ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
-    ask "\nDo you want to copy over your public SSH key to allow passwordless login?" + " (YES)".blue
-    #Openstruct.new{dataset: chosen,}
-    #binding.pry
-
+    hostname = ask "\nEnter a hostname for this machine:" + " (#{machine_alias}.#{domain})".blue
+    hostname = "#{machine_alias}.#{domain}" if hostname.empty?
+    #ask "\nMaximum memory this machine should use?" + " (2GB)".blue
+    #ask "\nMaximum disk space this machine should use?" + " (20GB)".blue
+    #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
+    OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
   end
 
   private
@@ -212,28 +223,3 @@ class New < SmartOS::Generators::Command
     res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
   end
 end
-
-
-=begin
-
-Available Datasets
--------------------
-1) Latest base64 14.2.0 (Zone, Already Installed)
-2) Latest standard64 14.2.0 (Zone)
-3) Latest debian 20141001 (KVM)
-4) Latest centos 20141001 (KVM)
-5) List all 56 Datasets
-
-Add option to change dataset source
-=end
-
-
-
-
-
-
-
-
-
-
-

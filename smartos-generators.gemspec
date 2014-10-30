@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'colorize'
   spec.add_dependency 'ipaddress'
   spec.add_dependency 'public_suffix'
+  spec.add_dependency 'terminal-table'
 
   spec.add_runtime_dependency 'smartos'
 end
