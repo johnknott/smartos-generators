@@ -112,8 +112,7 @@ class New < SmartOS::Generators::Command
         ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
     else
       hostname_to_set =
-        ask("Please enter the hostname for the Global Zone - this will be set on boot:" +
-            " |#{host_or_ip}|".blue){|q|q.default = host_or_ip}
+        ask_with_default("Please enter the hostname for the Global Zone - this will be set on boot:", host_or_ip)
     end
   end
 
@@ -121,9 +120,9 @@ class New < SmartOS::Generators::Command
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_pvn_vlan_details
     loop do
-      answer = ask\
-        "\nPlease enter the IP range you'd like to set up your private virtual network in CIDR "\
-        'notation:' + " |10.0.0.20/24|".blue
+      answer = ask_with_default\
+        ("Please enter the IP range you'd like to set up your private virtual network in CIDR "\
+        'notation:', '10.0.0.20/24')
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
@@ -166,6 +165,7 @@ class New < SmartOS::Generators::Command
   def gather_repository
     say "Please choose which dataset repository to use:" + " |https://datasets.at|".blue
     choose do |menu|
+      menu.default = 'https://datasets.at'
       menu.choice "https://datasets.at/"
       menu.choice "https://images.joyent.com"
     end
@@ -203,16 +203,16 @@ class New < SmartOS::Generators::Command
       end
     end
 
+    ask_with_default("Enter a hostname for this machine:", hostname_guess)
+
     domain = PublicSuffix.parse(gz_info.hostname).domain
-    machine_alias = ask("\nEnter an Alias for this machine: i.e. web" {}
-    hostname_guess = "#{machine_alias}.#{domain}"
-    hostname = ask("\nEnter a hostname for this machine:" + " |#{hostname_guess}|".blue){|q| q.default = hostname_guess}
-    hostname = "#{machine_alias}.#{domain}" if hostname.empty?
-    if agree("\nDoes this machine need an Internet facing IP address?" + " |no|".blue){|q| q.default = 'no'}
-      ask("\nPlease enter the internet facing IP you want to use:" + "||".blue){|q| q.default = gz_info.get_next_free_ip}
+    machine_alias = ask("\nEnter an Alias for this machine: i.e. web")
+    hostname = ask_with_default("Enter a hostname for this machine:", + "#{machine_alias}.#{domain}")
+    if agree_with_default("Does this machine need an Internet facing IP address?", 'no')
+      ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
     end
-    ask("\nMaximum memory this machine should use?" + " |(2GB)|".blue) {|q| q.default = '2GB'}
-    ask "\nMaximum disk space this machine should use?" + "  |20GB|".blue {|q| q.default = '20GB'}
+    memory_cap = ask_with_default("Maximum memory this machine should use?", '2GB')
+    disk_cap = ask_with_default("Maximum disk space this machine should use?", '20GB')
     #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
     OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
   end
@@ -226,4 +226,13 @@ class New < SmartOS::Generators::Command
   def latest_of_type(res, proc)
     res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
   end
+
+  def ask_with_default(question, default)
+    ask("\n#{question}" + " |#{default}|".blue){|q| q.default = default}
+  end
+
+  def agree_with_default(question, default)
+    agree("\n#{question}" + " |#{default}|".blue){|q| q.default = default}
+  end
+
 end
