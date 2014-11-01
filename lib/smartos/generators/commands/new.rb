@@ -173,11 +173,12 @@ class New < SmartOS::Generators::Command
 
   def configure_virtual_machine(gz_info)
 
-    unless @res
-      SmartOS::GlobalZone.connect(gz_info.gz_host) do
-        @res = imgadm!('avail -j')
-      end
-    end
+    @res ||= get_available_images(gz_info)
+
+    # Suggest a few likely machine images.
+    # The most recent base64 and standard64 SmartOS datasets and the most recent Centos and Debian
+    # KVM images. The user can also drill down and choose an image from the entire collection of
+    # available datasets if they choose.
 
     base64 = latest_of_type(@res, ->(name){name == 'base64'})
     standard64 = latest_of_type(@res, ->(name){name == 'standard64'})
@@ -202,17 +203,23 @@ class New < SmartOS::Generators::Command
       end
     end
 
-    ask_with_default("Enter a hostname for this machine:", hostname_guess)
-
-    domain = PublicSuffix.parse(gz_info.hostname).domain
+    # Gather an alias for this machine
     machine_alias = @console.ask("\nEnter an Alias for this machine: i.e. web")
+
+    # Gather a hostname for this machine. Suggest a likely value.
+    domain = PublicSuffix.parse(gz_info.hostname).domain
     hostname = ask_with_default("Enter a hostname for this machine:", + "#{machine_alias}.#{domain}")
+
+    # Does this machine need an internet facing IP?
     if agree_with_default("Does this machine need an Internet facing IP address?", 'no')
       ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
     end
+
+
     memory_cap = ask_with_default("Maximum memory this machine should use?", '2GB')
     disk_cap = ask_with_default("Maximum disk space this machine should use?", '20GB')
-    #copy_ssh_key = agree "\nDo you want to copy over your public SSH key to allow passwordless login?"
+    num_cores = ask_with_default("How many CPU cores should this machine use?", '1')
+    copy_ssh_key = agree_with_default("Do you want to copy over your public SSH key to allow passwordless login?", 'yes')
     OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
   end
 
@@ -232,6 +239,12 @@ class New < SmartOS::Generators::Command
 
   def agree_with_default(question, default)
     @console.agree("\n#{question}"){|q| q.default = default}
+  end
+
+  def get_available_images(gz_info)
+    SmartOS::GlobalZone.connect(gz_info.gz_host) do
+      imgadm!('avail -j')
+    end
   end
 
 end
