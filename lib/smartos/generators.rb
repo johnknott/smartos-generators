@@ -1,7 +1,7 @@
 require 'slop'
 require 'pry'
 require 'colorize'
-require 'highline/import'
+require 'highline'
 require 'ipaddress'
 require 'public_suffix'
 require 'terminal-table'

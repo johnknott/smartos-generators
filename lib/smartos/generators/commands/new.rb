@@ -69,7 +69,7 @@ class New < SmartOS::Generators::Command
     host_or_ip = info = nil
 
     loop do
-      host_or_ip = ask "\nPlease enter the IP address or hostname of your SmartOS Global Zone:"
+      host_or_ip = @console.ask "\nPlease enter the IP address or hostname of your SmartOS Global Zone:"
 
       info = SmartOS::GlobalZone.is_global_zone?(host_or_ip)
       break if info
@@ -92,7 +92,7 @@ class New < SmartOS::Generators::Command
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
         gz_info.vm_definitions << configure_virtual_machine(gz_info)
-        break unless agree "\nFinished configuring this VM. Add another?"
+        break unless agree_with_default("\nFinished configuring this VM. Add another?", 'yes')
       end
     else
       puts "\nSkipping Machine definitions."
@@ -109,7 +109,7 @@ class New < SmartOS::Generators::Command
     hostname_to_set = nil
     if is_ip
       hostname_to_set =
-        ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
+        @console.ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
     else
       hostname_to_set =
         ask_with_default("Please enter the hostname for the Global Zone - this will be set on boot:", host_or_ip)
@@ -120,9 +120,9 @@ class New < SmartOS::Generators::Command
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_pvn_vlan_details
     loop do
-      answer = ask_with_default\
-        ("Please enter the IP range you'd like to set up your private virtual network in CIDR "\
-        'notation:', '10.0.0.20/24')
+      answer = ask_with_default(
+        "Please enter the IP range you'd like to set up your private virtual network in CIDR "\
+        "notation:", '10.0.0.20/24')
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
@@ -142,7 +142,7 @@ class New < SmartOS::Generators::Command
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_internet_vlan_details
     loop do
-      answer = ask\
+      answer = @console.ask\
         "\nPlease enter the IP range you'd like to use for your Internet-facing Network in CIDR "\
         'notation (e.g. 158.251.218.81/29)'
       begin
@@ -164,7 +164,7 @@ class New < SmartOS::Generators::Command
   # @return [String] String containing URL of the dataset repository to set.
   def gather_repository
     say "Please choose which dataset repository to use:" + " |https://datasets.at|".blue
-    choose do |menu|
+    @console.choose do |menu|
       menu.default = 'https://datasets.at'
       menu.choice "https://datasets.at/"
       menu.choice "https://images.joyent.com"
@@ -179,7 +179,6 @@ class New < SmartOS::Generators::Command
       end
     end
 
-
     base64 = latest_of_type(@res, ->(name){name == 'base64'})
     standard64 = latest_of_type(@res, ->(name){name == 'standard64'})
     debian = latest_of_type(@res, ->(name){/debian.*/.match(name)})
@@ -187,12 +186,12 @@ class New < SmartOS::Generators::Command
 
     chosen = nil
     say "Please choose the dataset to base the VM on:"
-     chosen = choose do |menu|
+     chosen = @console.choose do |menu|
       menu.select_by = :index
-      menu.choice dataset_description(base64, '(Latest base64)')          do base64 end
-      menu.choice dataset_description(standard64, '(Latest standard64)')  do standard64 end
-      menu.choice dataset_description(debian, '(Latest debian)')          do debian end
-      menu.choice dataset_description(centos, '(Latest centos)')          do centos end
+      menu.choice dataset_description(base64, '(Latest base64)') {base64}
+      menu.choice dataset_description(standard64, '(Latest standard64)') {standard64}
+      menu.choice dataset_description(debian, '(Latest debian)') {debian}
+      menu.choice dataset_description(centos, '(Latest centos)') {centos}
 
       menu.choice "Choose from all #{@res.length} Datasets" do
         choose do |menu|
@@ -206,7 +205,7 @@ class New < SmartOS::Generators::Command
     ask_with_default("Enter a hostname for this machine:", hostname_guess)
 
     domain = PublicSuffix.parse(gz_info.hostname).domain
-    machine_alias = ask("\nEnter an Alias for this machine: i.e. web")
+    machine_alias = @console.ask("\nEnter an Alias for this machine: i.e. web")
     hostname = ask_with_default("Enter a hostname for this machine:", + "#{machine_alias}.#{domain}")
     if agree_with_default("Does this machine need an Internet facing IP address?", 'no')
       ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
@@ -228,11 +227,11 @@ class New < SmartOS::Generators::Command
   end
 
   def ask_with_default(question, default)
-    ask("\n#{question}" + " |#{default}|".blue){|q| q.default = default}
+    @console.ask("\n#{question}"){|q| q.default = default}
   end
 
   def agree_with_default(question, default)
-    agree("\n#{question}" + " |#{default}|".blue){|q| q.default = default}
+    @console.agree("\n#{question}"){|q| q.default = default}
   end
 
 end

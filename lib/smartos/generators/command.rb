@@ -1,6 +1,8 @@
 module SmartOS
   module Generators
     class Command
+      attr_accessor :console
+
       USAGE_OUTSIDE_PROJECT = <<-eos
       Usage:
         smartos <command> [options]
@@ -33,6 +35,10 @@ module SmartOS
       def self.usage(within_project)
         str = within_project ? USAGE_WITHIN_PROJECT : USAGE_OUTSIDE_PROJECT
         strip_heredoc(str)
+      end
+
+      def initialize
+        @console = HighLine.new
       end
 
     end
