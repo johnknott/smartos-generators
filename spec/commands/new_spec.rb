@@ -41,6 +41,7 @@ describe "'smartos new' command" do
       internet_net_range: '158.251.218.81/29',
       dataset_repository: 'https://datasets.at/',
       vm_definitions:     [])
+
     newCommand = New.new
     answer = StringIO.new("2\ndb\n\nno\n3gb\n30gb\n1\nno\n")
     answer.rewind

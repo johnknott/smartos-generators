@@ -215,9 +215,9 @@ class New < SmartOS::Generators::Command
       ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
     end
 
-    memory_cap = ask_with_default("Maximum memory this machine should use?", '2GB')
-    disk_cap = ask_with_default("Maximum disk space this machine should use?", '20GB')
-    num_cores = ask_with_default("How many CPU cores should this machine use?", '1')
+    memory_cap = ask("Maximum memory this machine should use?") {|q| q.validate = /\A\d+(mb|gb)\z/i; q.default = '2GB';q.case = :up}
+    disk_cap = ask("Maximum disk space this machine should use?") {|q| q.validate = /\A\d+(mb|gb)\z/i; q.default = '20GB';q.case = :up}
+    num_cores = ask("How many CPU cores should this machine use?"){|q| q.validate = /\A\d+\z/; q.default = 1}
     copy_ssh_key = agree_with_default("Do you want to copy over your public SSH key to allow passwordless login?", 'yes')
     OpenStruct.new(
       dataset: chosen['manifest'],
@@ -235,6 +235,10 @@ class New < SmartOS::Generators::Command
 
   def latest_of_type(res, proc)
     res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
+  end
+
+  def ask(question, &block)
+   @console.ask("\n" + question, &block)
   end
 
   def ask_with_default(question, default)
