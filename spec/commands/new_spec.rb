@@ -33,8 +33,7 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
     
-    expect(
-      OpenStruct.new(
+    expect(result).to eq(OpenStruct.new(
         gz_host:            'gz.menu.directory',
         hostname:           'gz.menu.directory',
         local_net_range:    IPAddress.parse('10.0.0.1/24'),
@@ -50,7 +49,7 @@ describe "'smartos new' command" do
             cpu_cores: 1,
             copy_ssh_key: true
           )]
-    )).to eq(result)
+    ))
   end
 
   it "should configure a single virtual machine correctly when overriding defaults" do
@@ -75,8 +74,7 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
 
-    expect(
-      OpenStruct.new(
+    expect(result).to eq(OpenStruct.new(
         gz_host:            '144.76.94.208',
         hostname:           'gz.monkey.com',
         local_net_range:    IPAddress.parse('10.20.0.1/24'),
@@ -92,7 +90,92 @@ describe "'smartos new' command" do
             cpu_cores: 2,
             copy_ssh_key: false
           )]
-    )).to eq(result)
+    ))
+  end
+
+
+  it "should configure several virtual machines correctly with the expected results" do
+    answers = [
+      '144.76.94.208',          # host or ip of global zone
+      'gz.monkey.com',          # hostname to set 
+      '10.20.0.1/24',           # local net range
+      '168.211.218.81/29',      # internet net range
+      '2',                      # repository
+      'yes',                    # Define your machines now? (defaults to yes)
+
+      '5',                      # dataset (show more)
+      '274',                    # dataset
+      'web',                    # alias
+      'www.monkey.com',         # hostname
+      'yes',                    # is this machine to be internet facing?
+      '',                       # internet facing IP
+      '3GB',                    # memory cap
+      '30GB',                   # disk cap
+      '2',                      # cpu cores
+      'no',                     # copy ssh key
+      'yes',                    # finished configuring. add another vm?
+
+      '1',                      # dataset
+      'redis',                  # alias
+      '',                       # hostname
+      'yes',                    # is this machine to be internet facing?
+      '',                       # internet facing IP
+      '2GB',                    # memory cap
+      '20GB',                   # disk cap
+      '1',                      # cpu cores
+      'no',                     # copy ssh key
+      'yes',                    # finished configuring. add another vm?
+
+      '1',                      # dataset
+      'db',                     # alias
+      '',                       # hostname
+      'yes',                    # is this machine to be internet facing?
+      '',                       # internet facing IP
+      '8GB',                    # memory cap
+      '50GB',                   # disk cap
+      '1',                      # cpu cores
+      'no',                     # copy ssh key
+      'no',                     # finished configuring. add another vm?
+    ]
+
+    result = new_global_zone_from_answers(answers)
+
+    expect(result).to eq(OpenStruct.new(
+        gz_host:            '144.76.94.208',
+        hostname:           'gz.monkey.com',
+        local_net_range:    IPAddress.parse('10.20.0.1/24'),
+        internet_net_range: IPAddress.parse('168.211.218.81/29'),
+        dataset_repository: 'https://images.joyent.com',
+        vm_definitions:     [
+          OpenStruct.new(
+            dataset: @imgadm_get_data.reverse[273]['manifest'],
+            hostname: 'www.monkey.com',
+            machine_alias: 'web',
+            memory_cap: '3GB',
+            disk_cap: '30GB',
+            cpu_cores: 2,
+            copy_ssh_key: false
+          ),
+          OpenStruct.new(
+            dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
+            hostname: 'redis.monkey.com',
+            machine_alias: 'redis',
+            memory_cap: '2GB',
+            disk_cap: '20GB',
+            cpu_cores: 1,
+            copy_ssh_key: false
+          ),
+          OpenStruct.new(
+            dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
+            hostname: 'db.monkey.com',
+            machine_alias: 'db',
+            memory_cap: '8GB',
+            disk_cap: '50GB',
+            cpu_cores: 1,
+            copy_ssh_key: false
+          )
+        ]
+    ))
   end
 
 end

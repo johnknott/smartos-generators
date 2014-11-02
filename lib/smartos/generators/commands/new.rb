@@ -197,8 +197,9 @@ class New < SmartOS::Generators::Command
       menu.choice dataset_description(centos, '(Latest centos)') do centos end
 
       menu.choice "Choose from all #{@res.length} Datasets" do
-        choose do |menu|
+        @console.choose do |menu|
           @res.reverse_each do |dataset|
+            menu.select_by = :index
             menu.choice dataset_description(dataset) do dataset end
           end
         end
