@@ -26,7 +26,7 @@ class New < SmartOS::Generators::Command
     end
 
     if args.size != 1
-      puts opts
+      say opts
       exit
     end
 
@@ -39,17 +39,15 @@ class New < SmartOS::Generators::Command
   def new_project(name)
     path = File.expand_path(name)
     if Dir.exist?(path)
-      puts "#{path} already exists. Please choose a directory name that doesn't already exist.".red
+      say "#{path} already exists. Please choose a directory name that doesn't already exist.".red
       exit
     end
 
     #system 'mkdir', '-p', path
-    #puts "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
-    #puts "At path: #{path}".green
+    #say "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
+    #say "At path: #{path}".green
 
     gz_info = new_global_zone
-
-    puts
 
     table = Terminal::Table.new do |t|
       gz_info.vm_definitions.each do |vm|
@@ -57,9 +55,9 @@ class New < SmartOS::Generators::Command
       end
     end
 
-    puts table
+    say table
 
-    puts "\nYou have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
+    say "You have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
          "'smartos up' to build it!".blue
   end
 
@@ -73,11 +71,11 @@ class New < SmartOS::Generators::Command
 
       info = SmartOS::GlobalZone.is_global_zone?(host_or_ip)
       break if info
-      puts 'Not a valid SmartOS Global Zone hostname or IP address.'.red
+      say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
     end
 
-    puts "\nSuccessfully connected to Global Zone #{host_or_ip}".green
-    puts "#{info}\n".green
+    say "\nSuccessfully connected to Global Zone #{host_or_ip}".green
+    say "#{info}\n".green
 
     # Gather information
     gz_info = OpenStruct.new(
@@ -89,13 +87,13 @@ class New < SmartOS::Generators::Command
       vm_definitions:     [])
 
 
-    if agree "\nDo you want to create your Virtual Machine definitions now?"
+    if agree("Do you want to create your Virtual Machine definitions now?"){ |q| q.default = 'yes'}
       loop do
         gz_info.vm_definitions << configure_virtual_machine(gz_info)
         break unless agree("Finished configuring this VM. Add another?"){ |q| q.default = 'yes'}
       end
     else
-      puts "\nSkipping Machine definitions."
+      say "\nSkipping Machine definitions."
     end
 
     gz_info
@@ -126,14 +124,14 @@ class New < SmartOS::Generators::Command
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
-          puts "\nPlease enter a range. You entered a single IP address.".red
+          say "Please enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring private virtual network as Address: #{ip.address} "\
+          say "Configuring private virtual network as Address: #{ip.address} "\
           "- Netmask: #{ip.netmask}".green
           return ip
         end
       rescue
-        puts "\nInvalid CIDR IP range.".red
+        say "Invalid CIDR IP range.".red
       end
     end
   end
@@ -148,14 +146,14 @@ class New < SmartOS::Generators::Command
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
-          puts "\nPlease enter a range. You entered a single IP address.".red
+          say "Please enter a range. You entered a single IP address.".red
         else
-          puts "\nConfiguring internet-facing network as Address: #{ip.address} - Netmask: "\
+          say "Configuring internet-facing network as Address: #{ip.address} - Netmask: "\
                "#{ip.netmask}".green
           return ip
         end
       rescue
-        puts "\nInvalid CIDR IP range.".red
+        say "Invalid CIDR IP range.".red
       end
     end
   end
@@ -163,7 +161,7 @@ class New < SmartOS::Generators::Command
   # Asks the user for a dataset repository to use. This will be set when when the GZ boots.
   # @return [String] String containing URL of the dataset repository to set.
   def gather_repository
-    say "Please choose which dataset repository to use:" + " |https://datasets.at|"
+    @console.say "Please choose which dataset repository to use:" + " |https://datasets.at|"
     @console.choose do |menu|
       menu.default = 'https://datasets.at'
       menu.choice "https://datasets.at/"
@@ -215,7 +213,7 @@ class New < SmartOS::Generators::Command
     # Does this machine need an internet facing IP?
     if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
       ask("Please enter the internet facing IP you want to use:") do |q|
-        q.default = gz_info.get_next_free_ip
+        q.default = 'moo' #gz_info.get_next_free_ip
       end
     end
 
@@ -260,11 +258,15 @@ class New < SmartOS::Generators::Command
   end
 
   def ask(question, type = nil, &block)
-   @console.ask("\n" + question, type, &block)
+   @console.ask("\n#{question}", type, &block)
   end
 
   def agree(question, type = nil, &block)
-   @console.agree("\n" + question, &block)
+   @console.agree("\n#{question}", type, &block)
+  end
+
+  def say(str)
+   @console.say("\n#{str}")
   end
 
   def get_available_images(gz_info)
