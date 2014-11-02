@@ -9,7 +9,7 @@ describe "'smartos new' command" do
     newCommand.console = HighLine.new(answers_io, StringIO.new)
     @imgadm_get_data ||= JSON.parse(File.read('spec/fixtures/imgadm-get.json'))
     newCommand.instance_variable_set(:@res, @imgadm_get_data)
-    newCommand.new_global_zone
+    newCommand.new_global_zone('SunOS gz.menu.directory 5.11 joyent_20140919T024804Z i86pc i386 i86pc')
   end
 
   it "should configure a single virtual machine correctly when accepting defaults" do    
@@ -70,8 +70,7 @@ describe "'smartos new' command" do
       '30GB',                   # disk cap
       '2',                      # cpu cores
       'no',                     # copy ssh key
-      'no',                      # finished configuring. add another vm?
-      ''
+      'no'                      # finished configuring. add another vm?
     ]
 
     result = new_global_zone_from_answers(answers)

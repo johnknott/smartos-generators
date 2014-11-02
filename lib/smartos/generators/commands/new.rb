@@ -63,13 +63,13 @@ class New < SmartOS::Generators::Command
 
   # Creates a new SmartOS Global Zone definition
   # @return [void]
-  def new_global_zone
-    host_or_ip = info = nil
+  def new_global_zone(info = nil)
+    host_or_ip = nil
 
     loop do
-      host_or_ip = @console.ask "\nPlease enter the IP address or hostname of your SmartOS Global Zone:"
+      host_or_ip = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
 
-      info = SmartOS::GlobalZone.is_global_zone?(host_or_ip)
+      info ||= SmartOS::GlobalZone.is_global_zone?(host_or_ip)
       break if info
       say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
     end
