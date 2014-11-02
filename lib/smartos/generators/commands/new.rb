@@ -74,8 +74,8 @@ class New < SmartOS::Generators::Command
       say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
     end
 
-    say "\nSuccessfully connected to Global Zone #{host_or_ip}".green
-    say "#{info}\n".green
+    say "Successfully connected to Global Zone #{host_or_ip}".green
+    say "#{info}".green
 
     # Gather information
     gz_info = OpenStruct.new(
@@ -107,11 +107,13 @@ class New < SmartOS::Generators::Command
     hostname_to_set = nil
     if is_ip
       hostname_to_set =
-        @console.ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
+        ask('Please enter the hostname for the Global Zone - this will be set on boot:')
     else
       hostname_to_set =
         ask("Please enter the hostname for the Global Zone - this will be set on boot:") {|q| q.default = host_or_ip}
     end
+    say "Will set hostname to: #{hostname_to_set} on boot.".green
+    hostname_to_set
   end
 
   # Asks the user to provide network details for their private virtual network.
@@ -140,8 +142,8 @@ class New < SmartOS::Generators::Command
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_internet_vlan_details
     loop do
-      answer = @console.ask\
-        "\nPlease enter the IP range you'd like to use for your Internet-facing Network in CIDR "\
+      answer = ask \
+        "Please enter the IP range you'd like to use for your Internet-facing Network in CIDR "\
         'notation (e.g. 158.251.218.81/29)'
       begin
         ip = IPAddress.parse(answer)
@@ -161,12 +163,14 @@ class New < SmartOS::Generators::Command
   # Asks the user for a dataset repository to use. This will be set when when the GZ boots.
   # @return [String] String containing URL of the dataset repository to set.
   def gather_repository
-    @console.say "Please choose which dataset repository to use:" + " |https://datasets.at|"
-    @console.choose do |menu|
+    say "\nPlease choose which dataset repository to use:" + " |https://datasets.at|"
+    chosen = @console.choose do |menu|
       menu.default = 'https://datasets.at'
       menu.choice "https://datasets.at/"
       menu.choice "https://images.joyent.com"
     end
+    say "#{chosen} will be used as your dataset repository.".green
+    chosen
   end
 
   def configure_virtual_machine(gz_info)
@@ -184,7 +188,7 @@ class New < SmartOS::Generators::Command
     centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
 
     chosen = nil
-    @console.say "Please choose the dataset to base the VM on:"
+    say "Please choose the dataset to base the VM on:"
      chosen = @console.choose do |menu|
       menu.select_by = :index
       menu.choice dataset_description(base64, '(Latest base64)') do base64 end
@@ -202,7 +206,7 @@ class New < SmartOS::Generators::Command
     end
 
     # Gather an alias for this machine
-    machine_alias = ask("Enter an Alias for this machine: i.e. web")
+    machine_alias = ask("Enter an Alias for this machine: (e.g. web)")
 
     # Gather a hostname for this machine. Suggest a likely value.
     domain = PublicSuffix.parse(gz_info.hostname).domain
@@ -213,7 +217,7 @@ class New < SmartOS::Generators::Command
     # Does this machine need an internet facing IP?
     if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
       ask("Please enter the internet facing IP you want to use:") do |q|
-        q.default = 'moo' #gz_info.get_next_free_ip
+        q.default = gz_info.get_next_free_ip
       end
     end
 
@@ -266,7 +270,7 @@ class New < SmartOS::Generators::Command
   end
 
   def say(str)
-   @console.say("\n#{str}")
+   @console.say("#{str}")
   end
 
   def get_available_images(gz_info)
