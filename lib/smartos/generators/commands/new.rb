@@ -204,21 +204,41 @@ class New < SmartOS::Generators::Command
     end
 
     # Gather an alias for this machine
-    machine_alias = @console.ask("\nEnter an Alias for this machine: i.e. web")
+    machine_alias = ask("Enter an Alias for this machine: i.e. web")
 
     # Gather a hostname for this machine. Suggest a likely value.
     domain = PublicSuffix.parse(gz_info.hostname).domain
-    hostname = ask_with_default("Enter a hostname for this machine:", "#{machine_alias}.#{domain}")
-
-    # Does this machine need an internet facing IP?
-    if agree_with_default("Does this machine need an Internet facing IP address?", 'no')
-      ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
+    hostname = ask("Enter a hostname for this machine:") do |q|
+      q.default = "#{machine_alias}.#{domain}"
     end
 
-    memory_cap = ask("Maximum memory this machine should use?") {|q| q.validate = /\A\d+(mb|gb)\z/i; q.default = '2GB';q.case = :up}
-    disk_cap = ask("Maximum disk space this machine should use?") {|q| q.validate = /\A\d+(mb|gb)\z/i; q.default = '20GB';q.case = :up}
-    num_cores = ask("How many CPU cores should this machine use?"){|q| q.validate = /\A\d+\z/; q.default = 1}
-    copy_ssh_key = agree_with_default("Do you want to copy over your public SSH key to allow passwordless login?", 'yes')
+    # Does this machine need an internet facing IP?
+    if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
+      ask("Please enter the internet facing IP you want to use:") do |q|
+        q.default = gz_info.get_next_free_ip
+      end
+    end
+
+    memory_cap = ask("Maximum memory this machine should use?") do |q|
+      q.validate = /\A\d+(mb|gb)\z/i
+      q.default = '2GB'
+      q.case = :up
+    end
+
+    disk_cap = ask("Maximum disk space this machine should use?")  do |q| 
+      q.validate = /\A\d+(mb|gb)\z/i
+      q.default = '20GB'
+      q.case = :up
+    end
+
+    num_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
+      q.default = 1
+    end
+
+    copy_ssh_key = agree("Do you want to copy over your public SSH key to allow passwordless login?") do |q| 
+      q.default = 'yes'
+    end
+
     OpenStruct.new(
       dataset: chosen['manifest'],
       machine_alias: machine_alias,
@@ -241,13 +261,14 @@ class New < SmartOS::Generators::Command
    @console.ask("\n" + question, &block)
   end
 
+  def agree(question, &block)
+   @console.agree("\n" + question, &block)
+  end
+
   def ask_with_default(question, default)
     @console.ask("\n#{question}"){|q| q.default = default}
   end
 
-  def agree_with_default(question, default)
-    @console.agree("\n#{question}"){|q| q.default = default}
-  end
 
   def get_available_images(gz_info)
     SmartOS::GlobalZone.connect(gz_info.gz_host) do
