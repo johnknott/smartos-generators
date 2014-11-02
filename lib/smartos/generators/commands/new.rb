@@ -92,7 +92,7 @@ class New < SmartOS::Generators::Command
     if agree "\nDo you want to create your Virtual Machine definitions now?"
       loop do
         gz_info.vm_definitions << configure_virtual_machine(gz_info)
-        break unless agree_with_default("\nFinished configuring this VM. Add another?", 'yes')
+        break unless agree("Finished configuring this VM. Add another?"){ |q| q.default = 'yes'}
       end
     else
       puts "\nSkipping Machine definitions."
@@ -112,7 +112,7 @@ class New < SmartOS::Generators::Command
         @console.ask ('Please enter the hostname for the Global Zone - this will be set on boot:')
     else
       hostname_to_set =
-        ask_with_default("Please enter the hostname for the Global Zone - this will be set on boot:", host_or_ip)
+        ask("Please enter the hostname for the Global Zone - this will be set on boot:") {|q| q.default = host_or_ip}
     end
   end
 
@@ -120,9 +120,9 @@ class New < SmartOS::Generators::Command
   # @return [IPAddress] containing the IP/Subnet information the user provided.
   def gather_pvn_vlan_details
     loop do
-      answer = ask_with_default(
+      answer = ask(
         "Please enter the IP range you'd like to set up your private virtual network in CIDR "\
-        "notation:", '10.0.0.20/24')
+        "notation:"){ |q| q.default = '10.0.0.20/24'}
       begin
         ip = IPAddress.parse(answer)
         if ip.prefix == 32
@@ -163,7 +163,7 @@ class New < SmartOS::Generators::Command
   # Asks the user for a dataset repository to use. This will be set when when the GZ boots.
   # @return [String] String containing URL of the dataset repository to set.
   def gather_repository
-    say "Please choose which dataset repository to use:" + " |https://datasets.at|".blue
+    say "Please choose which dataset repository to use:" + " |https://datasets.at|"
     @console.choose do |menu|
       menu.default = 'https://datasets.at'
       menu.choice "https://datasets.at/"
@@ -231,7 +231,7 @@ class New < SmartOS::Generators::Command
       q.case = :up
     end
 
-    num_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
+    cpu_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
       q.default = 1
     end
 
@@ -244,7 +244,9 @@ class New < SmartOS::Generators::Command
       machine_alias: machine_alias,
       hostname: hostname,
       memory_cap: memory_cap,
-      disk_cap: disk_cap)
+      disk_cap: disk_cap,
+      cpu_cores: cpu_cores,
+      copy_ssh_key: copy_ssh_key)
   end
 
   private
@@ -257,18 +259,13 @@ class New < SmartOS::Generators::Command
     res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
   end
 
-  def ask(question, &block)
-   @console.ask("\n" + question, &block)
+  def ask(question, type = nil, &block)
+   @console.ask("\n" + question, type, &block)
   end
 
-  def agree(question, &block)
+  def agree(question, type = nil, &block)
    @console.agree("\n" + question, &block)
   end
-
-  def ask_with_default(question, default)
-    @console.ask("\n#{question}"){|q| q.default = default}
-  end
-
 
   def get_available_images(gz_info)
     SmartOS::GlobalZone.connect(gz_info.gz_host) do
