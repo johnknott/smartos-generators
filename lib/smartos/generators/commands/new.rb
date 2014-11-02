@@ -186,13 +186,13 @@ class New < SmartOS::Generators::Command
     centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
 
     chosen = nil
-    say "Please choose the dataset to base the VM on:"
+    @console.say "Please choose the dataset to base the VM on:"
      chosen = @console.choose do |menu|
       menu.select_by = :index
-      menu.choice dataset_description(base64, '(Latest base64)') {base64}
-      menu.choice dataset_description(standard64, '(Latest standard64)') {standard64}
-      menu.choice dataset_description(debian, '(Latest debian)') {debian}
-      menu.choice dataset_description(centos, '(Latest centos)') {centos}
+      menu.choice dataset_description(base64, '(Latest base64)') do base64 end
+      menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
+      menu.choice dataset_description(debian, '(Latest debian)') do debian end
+      menu.choice dataset_description(centos, '(Latest centos)') do centos end
 
       menu.choice "Choose from all #{@res.length} Datasets" do
         choose do |menu|
@@ -208,19 +208,23 @@ class New < SmartOS::Generators::Command
 
     # Gather a hostname for this machine. Suggest a likely value.
     domain = PublicSuffix.parse(gz_info.hostname).domain
-    hostname = ask_with_default("Enter a hostname for this machine:", + "#{machine_alias}.#{domain}")
+    hostname = ask_with_default("Enter a hostname for this machine:", "#{machine_alias}.#{domain}")
 
     # Does this machine need an internet facing IP?
     if agree_with_default("Does this machine need an Internet facing IP address?", 'no')
       ask_with_default("Please enter the internet facing IP you want to use:", gz_info.get_next_free_ip)
     end
 
-
     memory_cap = ask_with_default("Maximum memory this machine should use?", '2GB')
     disk_cap = ask_with_default("Maximum disk space this machine should use?", '20GB')
     num_cores = ask_with_default("How many CPU cores should this machine use?", '1')
     copy_ssh_key = agree_with_default("Do you want to copy over your public SSH key to allow passwordless login?", 'yes')
-    OpenStruct.new(dataset: chosen['manifest'], machine_alias: machine_alias, hostname: hostname)
+    OpenStruct.new(
+      dataset: chosen['manifest'],
+      machine_alias: machine_alias,
+      hostname: hostname,
+      memory_cap: memory_cap,
+      disk_cap: disk_cap)
   end
 
   private
