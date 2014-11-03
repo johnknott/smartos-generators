@@ -1,13 +1,13 @@
 class New < SmartOS::Generators::Command
 
   class GlobalZoneDefinition
-    def initialize(:gz_host, :hostname, :pvn_net_range, :internet_net_range,
-                   :dataset_repository, :gz_pvn_ip, :gz_internet_ip, :vm_definitions)
-    #todo convert this to accept structure
+    def initialize(gz_host: nil, hostname: nil, pvn_net_range: nil, internet_net_range: nil,
+                   dataset_repository: nil, gz_pvn_ip: nil, gz_internet_ip: nil, vm_definitions: nil)
+    # change to merge or reverse merge
+    @gz_host = gz_host
     end
   end
 
-   = Struct.new()
 
   MachineDefinition = Struct.new(:dataset, :machine_alias, :hostname, :memory_cap, :disk_cap,
                                  :cpu_cores, :copy_ssh_key, :internet_facing_ip, :pvn_ip)
