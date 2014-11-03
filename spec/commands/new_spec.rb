@@ -23,6 +23,7 @@ describe "'smartos new' command" do
       '2',                  # dataset
       'db',                 # alias
       '',                   # hostname (default)
+      '',                   # PVN IP
       '',                   # internet facing interface?
       '',                   # memory cap
       '',                   # disk cap
@@ -48,7 +49,8 @@ describe "'smartos new' command" do
             disk_cap: '20GB',
             cpu_cores: 1,
             copy_ssh_key: true,
-            internet_facing_ip: nil
+            internet_facing_ip: nil,
+            pvn_ip: IPAddress.parse('10.20.0.1')
           )]
     ))
   end
@@ -64,6 +66,7 @@ describe "'smartos new' command" do
       '2',                      # dataset
       'web',                    # alias
       'www.monkey.com',         # hostname
+      '',                       # PVN IP
       'yes',                    # is this machine to be internet facing?
       '158.251.218.82',         # internet facing IP
       '3GB',                    # memory cap
@@ -90,7 +93,8 @@ describe "'smartos new' command" do
             disk_cap: '30GB',
             cpu_cores: 2,
             copy_ssh_key: false,
-            internet_facing_ip: IPAddress.parse('158.251.218.82')
+            internet_facing_ip: IPAddress.parse('158.251.218.82'),
+            pvn_ip: IPAddress.parse('10.20.0.1')
           )]
     ))
   end
@@ -110,6 +114,7 @@ describe "'smartos new' command" do
       'web',                    # alias
       'www.monkey.com',         # hostname
       'yes',                    # is this machine to be internet facing?
+      '',                       # PVN IP
       '',                       # internet facing IP
       '3GB',                    # memory cap
       '30GB',                   # disk cap
@@ -121,6 +126,7 @@ describe "'smartos new' command" do
       'redis',                  # alias
       '',                       # hostname
       'yes',                    # is this machine to be internet facing?
+      '',                       # PVN IP
       '',                       # internet facing IP
       '2GB',                    # memory cap
       '20GB',                   # disk cap
@@ -132,6 +138,7 @@ describe "'smartos new' command" do
       'db',                     # alias
       '',                       # hostname
       'yes',                    # is this machine to be internet facing?
+      '',                       # PVN IP
       '',                       # internet facing IP
       '8GB',                    # memory cap
       '50GB',                   # disk cap
@@ -157,7 +164,8 @@ describe "'smartos new' command" do
             disk_cap: '30GB',
             cpu_cores: 2,
             copy_ssh_key: false,
-            internet_facing_ip: IPAddress.parse('168.211.218.82')
+            internet_facing_ip: IPAddress.parse('168.211.218.82'),
+            pvn_ip: IPAddress.parse('10.20.0.1')
           ),
           MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
@@ -167,7 +175,8 @@ describe "'smartos new' command" do
             disk_cap: '20GB',
             cpu_cores: 1,
             copy_ssh_key: false,
-            internet_facing_ip: IPAddress.parse('168.211.218.83')
+            internet_facing_ip: IPAddress.parse('168.211.218.83'),
+            pvn_ip: IPAddress.parse('10.20.0.2')
           ),
           MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
@@ -177,7 +186,8 @@ describe "'smartos new' command" do
             disk_cap: '50GB',
             cpu_cores: 1,
             copy_ssh_key: false,
-            internet_facing_ip: IPAddress.parse('168.211.218.84')
+            internet_facing_ip: IPAddress.parse('168.211.218.84'),
+            pvn_ip: IPAddress.parse('10.20.0.3')
           )
         ]
     ))

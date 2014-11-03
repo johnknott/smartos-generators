@@ -1,17 +1,5 @@
 class New < SmartOS::Generators::Command
 
-  class GlobalZoneDefinition
-    def initialize(gz_host: nil, hostname: nil, pvn_net_range: nil, internet_net_range: nil,
-                   dataset_repository: nil, gz_pvn_ip: nil, gz_internet_ip: nil, vm_definitions: nil)
-    # change to merge or reverse merge
-    @gz_host = gz_host
-    end
-  end
-
-
-  MachineDefinition = Struct.new(:dataset, :machine_alias, :hostname, :memory_cap, :disk_cap,
-                                 :cpu_cores, :copy_ssh_key, :internet_facing_ip, :pvn_ip)
-
   # Creates a new SmartOS infrastructure project.
   # Every Command must implement 'perform'.
   # @param args arguments to be parsed
@@ -92,15 +80,11 @@ class New < SmartOS::Generators::Command
 
     # Gather information
     gz_info = GlobalZoneDefinition.new(
-      gz_host:            host_or_ip,
-      hostname:           gather_hostname(host_or_ip),
-      pvn_net_range:      gather_pvn_vlan_details,
-      internet_net_range: gather_internet_vlan_details,
-      dataset_repository: gather_repository,
-      #gz_pvn_ip:          ,
-      #gz_internet_ip:     ,
-      vm_definitions:     [])
-    binding.pry
+      host_or_ip,
+      gather_pvn_vlan_details,
+      gather_internet_vlan_details,
+      gather_hostname(host_or_ip),
+      gather_repository)
 
     if agree("Do you want to create your Virtual Machine definitions now?"){ |q| q.default = 'yes'}
       loop do
@@ -233,11 +217,15 @@ class New < SmartOS::Generators::Command
       q.default = "#{machine_alias}.#{domain}"
     end
 
+    pvn_ip = IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
+      q.default = get_next_free_pvn_ip(gz_info)
+    end)
+
     # Does this machine need an internet facing IP?
     internet_facing_ip = nil
     if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
       internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
-        q.default = get_next_free_internet_ip(gz_info)
+        q.default = get_next_free_internet_facing_ip(gz_info)
       end)
     end
 
@@ -262,15 +250,15 @@ class New < SmartOS::Generators::Command
     end
 
     MachineDefinition.new(
-      dataset: chosen['manifest'],
-      machine_alias: machine_alias,
-      hostname: hostname,
+      chosen['manifest'],
+      machine_alias,
+      hostname,
+      pvn_ip,
       memory_cap: memory_cap,
       disk_cap: disk_cap,
       cpu_cores: cpu_cores,
       copy_ssh_key: copy_ssh_key,
-      internet_facing_ip: internet_facing_ip,
-      pvn_ip: pvn_ip)
+      internet_facing_ip: internet_facing_ip)
   end
 
   private

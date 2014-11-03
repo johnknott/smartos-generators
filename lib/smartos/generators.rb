@@ -10,4 +10,6 @@ require 'smartos/generators/version'
 require 'smartos/generators/extensions'
 require 'smartos/generators/command'
 require 'smartos/generators/exceptions'
+require 'smartos/generators/global_zone_definition'
+require 'smartos/generators/machine_definition'
 Gem.find_files('smartos/generators/commands/**/*.rb').each { |path| require path }
