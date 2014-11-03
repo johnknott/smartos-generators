@@ -16,7 +16,7 @@ describe "'smartos new' command" do
     answers = [
       'gz.menu.directory',  # host or ip of global zone
       '',                   # hostname to set (defaults to gz.menu.directory)
-      '10.0.0.1/24',        # local net range
+      '10.0.0.1/24',        # pvn net range
       '158.251.218.81/29',  # internet net range
       '',                   # repository (defaults to datasets.at)
       '',                   # Define your machines now? (defaults to yes)
@@ -33,21 +33,22 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
     
-    expect(result).to eq(OpenStruct.new(
+    expect(result).to eq(GlobalZoneDefinition.new(
         gz_host:            'gz.menu.directory',
         hostname:           'gz.menu.directory',
         local_net_range:    IPAddress.parse('10.0.0.1/24'),
         internet_net_range: IPAddress.parse('158.251.218.81/29'),
         dataset_repository: 'https://datasets.at/',
         vm_definitions:     [
-          OpenStruct.new(
+          MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == '3f57ffe8-47da-11e4-aa8b-dfb50a06586a'}['manifest'],
             hostname: 'db.menu.directory',
             machine_alias: 'db',
             memory_cap: '2GB',
             disk_cap: '20GB',
             cpu_cores: 1,
-            copy_ssh_key: true
+            copy_ssh_key: true,
+            internet_facing_ip: nil
           )]
     ))
   end
@@ -56,7 +57,7 @@ describe "'smartos new' command" do
     answers = [
       '144.76.94.208',          # host or ip of global zone
       'gz.monkey.com',          # hostname to set 
-      '10.20.0.1/24',           # local net range
+      '10.20.0.1/24',           # pvn net range
       '168.211.218.81/29',      # internet net range
       '2',                      # repository
       'yes',                    # Define your machines now? (defaults to yes)
@@ -74,21 +75,22 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
 
-    expect(result).to eq(OpenStruct.new(
+    expect(result).to eq(GlobalZoneDefinition.new(
         gz_host:            '144.76.94.208',
         hostname:           'gz.monkey.com',
         local_net_range:    IPAddress.parse('10.20.0.1/24'),
         internet_net_range: IPAddress.parse('168.211.218.81/29'),
         dataset_repository: 'https://images.joyent.com',
         vm_definitions:     [
-          OpenStruct.new(
+          MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == '3f57ffe8-47da-11e4-aa8b-dfb50a06586a'}['manifest'],
             hostname: 'www.monkey.com',
             machine_alias: 'web',
             memory_cap: '3GB',
             disk_cap: '30GB',
             cpu_cores: 2,
-            copy_ssh_key: false
+            copy_ssh_key: false,
+            internet_facing_ip: IPAddress.parse('158.251.218.82')
           )]
     ))
   end
@@ -98,7 +100,7 @@ describe "'smartos new' command" do
     answers = [
       '144.76.94.208',          # host or ip of global zone
       'gz.monkey.com',          # hostname to set 
-      '10.20.0.1/24',           # local net range
+      '10.20.0.1/24',           # pvn net range
       '168.211.218.81/29',      # internet net range
       '2',                      # repository
       'yes',                    # Define your machines now? (defaults to yes)
@@ -140,39 +142,42 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
 
-    expect(result).to eq(OpenStruct.new(
+    expect(result).to eq(GlobalZoneDefinition.new(
         gz_host:            '144.76.94.208',
         hostname:           'gz.monkey.com',
-        local_net_range:    IPAddress.parse('10.20.0.1/24'),
+        pvn_net_range:      IPAddress.parse('10.20.0.1/24'),
         internet_net_range: IPAddress.parse('168.211.218.81/29'),
         dataset_repository: 'https://images.joyent.com',
         vm_definitions:     [
-          OpenStruct.new(
+          MachineDefinition.new(
             dataset: @imgadm_get_data.reverse[273]['manifest'],
             hostname: 'www.monkey.com',
             machine_alias: 'web',
             memory_cap: '3GB',
             disk_cap: '30GB',
             cpu_cores: 2,
-            copy_ssh_key: false
+            copy_ssh_key: false,
+            internet_facing_ip: IPAddress.parse('168.211.218.82')
           ),
-          OpenStruct.new(
+          MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
             hostname: 'redis.monkey.com',
             machine_alias: 'redis',
             memory_cap: '2GB',
             disk_cap: '20GB',
             cpu_cores: 1,
-            copy_ssh_key: false
+            copy_ssh_key: false,
+            internet_facing_ip: IPAddress.parse('168.211.218.83')
           ),
-          OpenStruct.new(
+          MachineDefinition.new(
             dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == 'd34c301e-10c3-11e4-9b79-5f67ca448df0'}['manifest'],
             hostname: 'db.monkey.com',
             machine_alias: 'db',
             memory_cap: '8GB',
             disk_cap: '50GB',
             cpu_cores: 1,
-            copy_ssh_key: false
+            copy_ssh_key: false,
+            internet_facing_ip: IPAddress.parse('168.211.218.84')
           )
         ]
     ))

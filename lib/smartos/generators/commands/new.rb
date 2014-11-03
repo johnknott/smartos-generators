@@ -1,4 +1,17 @@
 class New < SmartOS::Generators::Command
+
+  class GlobalZoneDefinition
+    def initialize(:gz_host, :hostname, :pvn_net_range, :internet_net_range,
+                   :dataset_repository, :gz_pvn_ip, :gz_internet_ip, :vm_definitions)
+    #todo convert this to accept structure
+    end
+  end
+
+   = Struct.new()
+
+  MachineDefinition = Struct.new(:dataset, :machine_alias, :hostname, :memory_cap, :disk_cap,
+                                 :cpu_cores, :copy_ssh_key, :internet_facing_ip, :pvn_ip)
+
   # Creates a new SmartOS infrastructure project.
   # Every Command must implement 'perform'.
   # @param args arguments to be parsed
@@ -78,14 +91,16 @@ class New < SmartOS::Generators::Command
     say "#{info}".green
 
     # Gather information
-    gz_info = OpenStruct.new(
+    gz_info = GlobalZoneDefinition.new(
       gz_host:            host_or_ip,
       hostname:           gather_hostname(host_or_ip),
-      local_net_range:    gather_pvn_vlan_details,
+      pvn_net_range:      gather_pvn_vlan_details,
       internet_net_range: gather_internet_vlan_details,
       dataset_repository: gather_repository,
+      #gz_pvn_ip:          ,
+      #gz_internet_ip:     ,
       vm_definitions:     [])
-
+    binding.pry
 
     if agree("Do you want to create your Virtual Machine definitions now?"){ |q| q.default = 'yes'}
       loop do
@@ -207,7 +222,10 @@ class New < SmartOS::Generators::Command
     end
 
     # Gather an alias for this machine
-    machine_alias = ask("Enter an Alias for this machine: (e.g. web)")
+    machine_alias = ask("Enter an Alias for this machine: (e.g. web)") do |q|
+      q.validate = /\A\w+\Z/
+      q.responses[:not_valid] = "Please enter a valid alias."
+    end
 
     # Gather a hostname for this machine. Suggest a likely value.
     domain = PublicSuffix.parse(gz_info.hostname).domain
@@ -216,10 +234,11 @@ class New < SmartOS::Generators::Command
     end
 
     # Does this machine need an internet facing IP?
+    internet_facing_ip = nil
     if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
-      ask("Please enter the internet facing IP you want to use:") do |q|
-        q.default = gz_info.get_next_free_ip
-      end
+      internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
+        q.default = get_next_free_internet_ip(gz_info)
+      end)
     end
 
     memory_cap = ask("Maximum memory this machine should use?") do |q|
@@ -242,14 +261,16 @@ class New < SmartOS::Generators::Command
       q.default = 'yes'
     end
 
-    OpenStruct.new(
+    MachineDefinition.new(
       dataset: chosen['manifest'],
       machine_alias: machine_alias,
       hostname: hostname,
       memory_cap: memory_cap,
       disk_cap: disk_cap,
       cpu_cores: cpu_cores,
-      copy_ssh_key: copy_ssh_key)
+      copy_ssh_key: copy_ssh_key,
+      internet_facing_ip: internet_facing_ip,
+      pvn_ip: pvn_ip)
   end
 
   private
@@ -272,6 +293,22 @@ class New < SmartOS::Generators::Command
 
   def say(str)
    @console.say("#{str}")
+  end
+
+  def get_next_free_internet_facing_ip(gz_info)
+    already_allocated = gz_info.vm_definitions.map{|x|x.internet_facing_ip.to_s}
+    gz_info.internet_net_range.each_host do |h|
+      return h.to_s unless already_allocated.include?(h.to_s)
+    end
+    nil
+  end
+
+  def get_next_free_pvn_ip(gz_info)
+    already_allocated = gz_info.vm_definitions.map{|x|x.pvn_ip.to_s}
+    gz_info.pvn_net_range.each_host do |h|
+      return h.to_s unless already_allocated.include?(h.to_s)
+    end
+    nil
   end
 
   def get_available_images(gz_info)
