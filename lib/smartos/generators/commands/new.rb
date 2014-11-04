@@ -81,9 +81,9 @@ class New < SmartOS::Generators::Command
     # Gather information
     gz_info = GlobalZoneDefinition.new(
       host_or_ip,
+      gather_hostname(host_or_ip),
       gather_pvn_vlan_details,
       gather_internet_vlan_details,
-      gather_hostname(host_or_ip),
       gather_repository)
 
     if agree("Do you want to create your Virtual Machine definitions now?"){ |q| q.default = 'yes'}
@@ -112,6 +112,7 @@ class New < SmartOS::Generators::Command
         ask("Please enter the hostname for the Global Zone - this will be set on boot:") {|q| q.default = host_or_ip}
     end
     say "Will set hostname to: #{hostname_to_set} on boot.".green
+
     hostname_to_set
   end
 

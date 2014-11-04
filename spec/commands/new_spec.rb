@@ -34,28 +34,29 @@ describe "'smartos new' command" do
 
     result = new_global_zone_from_answers(answers)
     
-    expect(result).to eq(GlobalZoneDefinition.new(
-        gz_host:            'gz.menu.directory',
-        hostname:           'gz.menu.directory',
-        local_net_range:    IPAddress.parse('10.0.0.1/24'),
-        internet_net_range: IPAddress.parse('158.251.218.81/29'),
-        dataset_repository: 'https://datasets.at/',
-        vm_definitions:     [
-          MachineDefinition.new(
-            dataset: @imgadm_get_data.find{|x|x['manifest']['uuid'] == '3f57ffe8-47da-11e4-aa8b-dfb50a06586a'}['manifest'],
-            hostname: 'db.menu.directory',
-            machine_alias: 'db',
-            memory_cap: '2GB',
-            disk_cap: '20GB',
-            cpu_cores: 1,
-            copy_ssh_key: true,
-            internet_facing_ip: nil,
-            pvn_ip: IPAddress.parse('10.20.0.1')
-          )]
-    ))
+    expect(result.gz_host).to eq('gz.menu.directory')
+    expect(result.hostname).to eq('gz.menu.directory')
+    expect(result.dataset_repository).to eq('https://datasets.at/')
+    expect(result.pvn_net_range).to eq(IPAddress.parse('10.0.0.1/24'))
+    expect(result.internet_net_range).to eq(IPAddress.parse('158.251.218.81/29'))
+    expect(result.gz_pvn_ip).to eq(IPAddress.parse('10.0.0.1'))
+    expect(result.gz_internet_ip).to eq(IPAddress.parse('158.251.218.81'))
+
+    expect(result.vm_definitions.size).to eq(1)
+
+    vmd = result.vm_definitions.first
+    expect(vmd.dataset['uuid']).to eq('3f57ffe8-47da-11e4-aa8b-dfb50a06586a')
+    expect(vmd.machine_alias).to eq('db')
+    expect(vmd.hostname).to eq('db.menu.directory')
+    expect(vmd.pvn_ip).to eq(IPAddress.parse('10.0.0.2'))
+    expect(vmd.internet_facing_ip).to eq(nil)
+    expect(vmd.memory_cap).to eq('2GB')
+    expect(vmd.disk_cap).to eq('20GB')
+    expect(vmd.cpu_cores).to eq(1)
+    expect(vmd.copy_ssh_key).to eq(true)
   end
 
-  it "should configure a single virtual machine correctly when overriding defaults" do
+  xit "should configure a single virtual machine correctly when overriding defaults" do
     answers = [
       '144.76.94.208',          # host or ip of global zone
       'gz.monkey.com',          # hostname to set 
@@ -100,7 +101,7 @@ describe "'smartos new' command" do
   end
 
 
-  it "should configure several virtual machines correctly with the expected results" do
+  xit "should configure several virtual machines correctly with the expected results" do
     answers = [
       '144.76.94.208',          # host or ip of global zone
       'gz.monkey.com',          # hostname to set 
