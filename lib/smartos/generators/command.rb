@@ -40,7 +40,6 @@ module SmartOS
       def initialize
         @console = HighLine.new
       end
-
     end
   end
 end

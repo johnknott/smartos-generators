@@ -286,16 +286,18 @@ class New < SmartOS::Generators::Command
 
   def get_next_free_internet_facing_ip(gz_info)
     already_allocated = gz_info.vm_definitions.map{|x|x.internet_facing_ip.to_s}
+    gateway = gz_info.internet_net_range.address
     gz_info.internet_net_range.each_host do |h|
-      return h.to_s unless already_allocated.include?(h.to_s)
+      return h.to_s unless already_allocated.include?(h.to_s) || h.to_s == gateway
     end
     nil
   end
 
   def get_next_free_pvn_ip(gz_info)
     already_allocated = gz_info.vm_definitions.map{|x|x.pvn_ip.to_s}
+    gateway = gz_info.pvn_net_range.address
     gz_info.pvn_net_range.each_host do |h|
-      return h.to_s unless already_allocated.include?(h.to_s)
+      return h.to_s unless already_allocated.include?(h.to_s) || h.to_s == gateway
     end
     nil
   end
