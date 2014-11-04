@@ -120,9 +120,9 @@ describe "'smartos new' command" do
       '274',                    # dataset
       'web',                    # alias
       'www.monkey.com',         # hostname
-      '',                       # PVN IP
+      '',                       # PVN IP (default to 10.20.0.2)
       'yes',                    # is this machine to be internet facing?
-      '',                       # internet facing IP
+      '',                       # internet facing IP (default to 168.211.218.82)
       '3GB',                    # memory cap
       '30GB',                   # disk cap
       '2',                      # cpu cores
@@ -131,10 +131,10 @@ describe "'smartos new' command" do
        
       '1',                      # dataset
       'redis',                  # alias
-      '',                       # hostname
-      '',                       # PVN IP
+      '',                       # hostname (default to redis.monkey.com)
+      '',                       # PVN IP (default to 10.20.0.3)
       'yes',                    # is this machine to be internet facing?
-      '',                       # internet facing IP
+      '',                       # internet facing IP (default to 168.211.218.83)
       '2GB',                    # memory cap
       '20GB',                   # disk cap
       '1',                      # cpu cores
@@ -143,10 +143,10 @@ describe "'smartos new' command" do
 
       '1',                      # dataset
       'db',                     # alias
-      '',                       # hostname
-      '',                       # PVN IP
+      '',                       # hostname (default to db.monkey.com)
+      '',                       # PVN IP (default to 10.20.0.4)
       'yes',                    # is this machine to be internet facing?
-      '',                       # internet facing IP
+      '',                       # internet facing IP (default to 168.211.218.84)
       '8GB',                    # memory cap
       '50GB',                   # disk cap
       '1',                      # cpu cores
@@ -155,6 +155,49 @@ describe "'smartos new' command" do
     ]
 
     result = new_global_zone_from_answers(answers)
+
+    expect(result.gz_host).to eq('144.76.94.208')
+    expect(result.hostname).to eq('gz.monkey.com')
+    expect(result.dataset_repository).to eq('https://images.joyent.com')
+    expect(result.pvn_net_range).to eq(IPAddress.parse('10.20.0.1/24'))
+    expect(result.internet_net_range).to eq(IPAddress.parse('168.211.218.81/29'))
+    expect(result.gz_pvn_ip).to eq(IPAddress.parse('10.20.0.1'))
+    expect(result.gz_internet_ip).to eq(IPAddress.parse('168.211.218.81'))
+
+    expect(result.vm_definitions.size).to eq(3)
+
+    vmd = result.vm_definitions[0]
+    expect(vmd.dataset['uuid']).to eq('46ca6534-53d5-11e4-8fc3-1384eeb2f1c3')
+    expect(vmd.machine_alias).to eq('web')
+    expect(vmd.hostname).to eq('www.monkey.com')
+    expect(vmd.pvn_ip).to eq(IPAddress.parse('10.20.0.2'))
+    expect(vmd.internet_facing_ip).to eq(IPAddress.parse('168.211.218.82'))
+    expect(vmd.memory_cap).to eq('3GB')
+    expect(vmd.disk_cap).to eq('30GB')
+    expect(vmd.cpu_cores).to eq(2)
+    expect(vmd.copy_ssh_key).to eq(false)
+
+    vmd = result.vm_definitions[1]
+    expect(vmd.dataset['uuid']).to eq('d34c301e-10c3-11e4-9b79-5f67ca448df0')
+    expect(vmd.machine_alias).to eq('redis')
+    expect(vmd.hostname).to eq('redis.monkey.com')
+    expect(vmd.pvn_ip).to eq(IPAddress.parse('10.20.0.3'))
+    expect(vmd.internet_facing_ip).to eq(IPAddress.parse('168.211.218.83'))
+    expect(vmd.memory_cap).to eq('2GB')
+    expect(vmd.disk_cap).to eq('20GB')
+    expect(vmd.cpu_cores).to eq(1)
+    expect(vmd.copy_ssh_key).to eq(false)
+
+    vmd = result.vm_definitions[2]
+    expect(vmd.dataset['uuid']).to eq('d34c301e-10c3-11e4-9b79-5f67ca448df0')
+    expect(vmd.machine_alias).to eq('db')
+    expect(vmd.hostname).to eq('db.monkey.com')
+    expect(vmd.pvn_ip).to eq(IPAddress.parse('10.20.0.4'))
+    expect(vmd.internet_facing_ip).to eq(IPAddress.parse('168.211.218.84'))
+    expect(vmd.memory_cap).to eq('8GB')
+    expect(vmd.disk_cap).to eq('50GB')
+    expect(vmd.cpu_cores).to eq(1)
+    expect(vmd.copy_ssh_key).to eq(false)
   end
 
 end
