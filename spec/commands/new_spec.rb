@@ -22,13 +22,13 @@ describe "'smartos new' command" do
       '',                   # Define your machines now? (defaults to yes)
       '2',                  # dataset
       'db',                 # alias
-      '',                   # hostname (default)
-      '',                   # PVN IP
-      '',                   # internet facing interface?
-      '',                   # memory cap
-      '',                   # disk cap
-      '',                   # cpu cores
-      '',                   # copy ssh key
+      '',                   # hostname (defaults to db.menu.directory)
+      '',                   # PVN IP (defaults to 10.0.0.2)
+      '',                   # internet facing interface? (defaults to no)
+      '',                   # memory cap (defaults to 2GB)
+      '',                   # disk cap (defaults to 20GB)
+      '',                   # cpu cores (defaults to 1)
+      '',                   # copy ssh key (defaults to yes)
       'no'                  # finished configuring. add another vm?
     ]
 
