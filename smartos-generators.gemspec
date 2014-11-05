@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['john.knott@gmail.com']
   spec.summary       = 'A script that helps to create and maintain a SmartOS based infrastructure.'
   # spec.description   = %q{}
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/johnknott/smartos-generators'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
