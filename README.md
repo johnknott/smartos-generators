@@ -1,3 +1,5 @@
+[ ![Codeship Status for johnknott/smartos-generators](https://www.codeship.io/projects/210d62d0-46ad-0132-16d3-124ef0ebe42e/status)](https://www.codeship.io/projects/45382)
+
 # Smartos::Generators
 
 TODO: Write a gem description
