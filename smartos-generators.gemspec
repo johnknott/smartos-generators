@@ -30,6 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ipaddress'
   spec.add_dependency 'public_suffix'
   spec.add_dependency 'terminal-table'
-
-  spec.add_runtime_dependency 'smartos'
+  spec.add_dependency 'smartos','~> 0.0.1.pre'
 end
