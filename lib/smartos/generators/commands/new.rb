@@ -44,19 +44,13 @@ class New < SmartOS::Generators::Command
       exit
     end
 
+    gz_info = new_global_zone
+
+    say table
+
     #system 'mkdir', '-p', path
     #say "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
     #say "At path: #{path}".green
-
-    gz_info = new_global_zone
-
-    table = Terminal::Table.new do |t|
-      gz_info.vm_definitions.each do |vm|
-        t << [vm.machine_alias, vm.hostname, vm.dataset['name'], vm.dataset['version'], vm.dataset['os']]
-      end
-    end
-
-    say table
 
     say "You have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
          "'smartos up' to build it!".blue
@@ -94,6 +88,21 @@ class New < SmartOS::Generators::Command
     else
       say "\nSkipping Machine definitions."
     end
+
+    puts "Global Zone Information".blue
+    puts "host: #{gz_info.gz_host}"
+    puts "set hostname to: #{gz_info.hostname}"
+    puts "pvn net range: #{gz_info.pvn_net_range}"
+    puts "Machine Definitions".blue
+    table = Terminal::Table.new do |t|
+      t.headings = ['Alias', 'Hostname', 'Dataset', 'Version', 'Type', 'VLAN IP', 'Internet IP', 'Cores', 'Mem', 'Disk']
+      gz_info.vm_definitions.each do |vm|
+        t << [vm.machine_alias, vm.hostname, vm.dataset['name'], vm.dataset['version'], vm.dataset['os'],
+              vm.pvn_ip, vm.internet_facing_ip || 'None', vm.cpu_cores, vm.memory_cap, vm.disk_cap]
+      end
+    end
+
+    puts table
 
     gz_info
   end
