@@ -1,5 +1,5 @@
-class Slop
-  def strip_indent(str)
-    str.gsub(/^#{str[/\A\s*/]}/, '')
+class String
+  def strip_indent
+    self.gsub(/^#{self[/\A\s*/]}/, '')
   end
 end

@@ -34,7 +34,7 @@ module SmartOS
 
       def self.usage(within_project)
         str = within_project ? USAGE_WITHIN_PROJECT : USAGE_OUTSIDE_PROJECT
-        strip_heredoc(str)
+        str.strip_indent
       end
 
       def initialize

@@ -6,7 +6,7 @@ class New < SmartOS::Generators::Command
   # @return [void]
   def perform(args)
     opts = Slop.parse!(args) do
-      banner strip_indent(<<-eos
+      banner (<<-eos
       Usage:
         smartos new <name>
 
@@ -21,7 +21,7 @@ class New < SmartOS::Generators::Command
 
         You can then create this infrastructure with the 'smartos up' command.
       eos
-      )
+      ).strip_indent
 
       on 'v', 'verbose', 'Enable verbose mode'
     end
