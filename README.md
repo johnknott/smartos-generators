@@ -1,4 +1,5 @@
-[![Codeship Status for johnknott/smartos-generators](https://www.codeship.io/projects/210d62d0-46ad-0132-16d3-124ef0ebe42e/status)](https://www.codeship.io/projects/45382)
+[![Code Climate](https://codeclimate.com/github/johnknott/smartos-generators/badges/gpa.svg)](https://codeclimate.com/github/johnknott/smartos-generators)
+[![Test Coverage](https://codeclimate.com/github/johnknott/smartos-generators/badges/coverage.svg)](https://codeclimate.com/github/johnknott/smartos-generators)
 [![Dependency Status](https://gemnasium.com/johnknott/smartos-generators.svg)](https://gemnasium.com/johnknott/smartos-generators)
 
 # Smartos::Generators
