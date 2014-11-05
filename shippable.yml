@@ -1,0 +1,19 @@
+language: ruby
+rvm:
+  - 2.1.2
+cache: true
+env:
+  - CI_REPORTS=shippable/testresults COVERAGE_REPORTS=shippable/codecoverage
+notifications:
+  email:
+    - john.knott@gmail.com
+# ensure the test output and coverage dirs are created
+before_script:
+  - mkdir -p shippable/testresults
+# write the rspec tests to the output dir
+script:
+  - CODECLIMATE_REPO_TOKEN=344d84c0624f1af128c4f153ec2477dba9daf8bc03cc5c1d5eae9ea4e9999af0 rspec -f documentation -o shippable/testresults/results.xml
+notifications:
+ email:
+     recipients:
+         - john.knott@gmail.com
