@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'highline-test'
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency "codeclimate-test-reporter"
+  spec.add_development_dependency "dotenv"
 
   spec.add_dependency 'slop'
   spec.add_dependency 'highline'

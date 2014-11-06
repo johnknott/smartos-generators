@@ -186,51 +186,15 @@ class New < SmartOS::Generators::Command
 
     @res ||= get_available_images(gz_info)
 
-    chosen = gather_dataset
-
-    # Gather an alias for this machine
-    machine_alias = ask("Enter an Alias for this machine: (e.g. web)") do |q|
-      q.validate = /\A\w+\Z/
-      q.responses[:not_valid] = "Please enter a valid alias."
-    end
-
-    # Gather a hostname for this machine. Suggest a likely value.
-    domain = PublicSuffix.parse(gz_info.hostname).domain
-    hostname = ask("Enter a hostname for this machine:") do |q|
-      q.default = "#{machine_alias}.#{domain}"
-    end
-
-    pvn_ip = IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
-      q.default = get_next_free_pvn_ip(gz_info)
-    end)
-
-    # Does this machine need an internet facing IP?
-    internet_facing_ip = nil
-    if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
-      internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
-        q.default = get_next_free_internet_facing_ip(gz_info)
-      end)
-    end
-
-    memory_cap = ask("Maximum memory this machine should use?") do |q|
-      q.validate = /\A\d+(mb|gb)\z/i
-      q.default = '2GB'
-      q.case = :up
-    end
-
-    disk_cap = ask("Maximum disk space this machine should use?")  do |q| 
-      q.validate = /\A\d+(mb|gb)\z/i
-      q.default = '20GB'
-      q.case = :up
-    end
-
-    cpu_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
-      q.default = 1
-    end
-
-    copy_ssh_key = agree("Do you want to copy over your public SSH key to allow passwordless login?") do |q| 
-      q.default = 'yes'
-    end
+    chosen              = gather_dataset
+    machine_alias       = gather_alias
+    hostname            = gather_vm_hostname(machine_alias, gz_info.hostname)
+    pvn_ip              = gather_pvn_ip(gz_info)
+    internet_facing_ip  = gather_internet_facing_ip(gz_info)
+    memory_cap          = gather_memory_cap
+    disk_cap            = gather_disk_cap
+    cpu_cores           = gather_cpu_cores
+    copy_ssh_key        = gather_copy_ssh_key
 
     MachineDefinition.new(
       chosen['manifest'],
@@ -258,7 +222,6 @@ class New < SmartOS::Generators::Command
     debian = latest_of_type(@res, ->(name){/debian.*/.match(name)})
     centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
 
-
     say "Please choose the dataset to base the VM on:"
     chosen = @console.choose do |menu|
       menu.select_by = :index
@@ -275,6 +238,64 @@ class New < SmartOS::Generators::Command
           end
         end
       end
+    end
+  end
+
+  def gather_pvn_ip(gz_info)
+    IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
+      q.default = get_next_free_pvn_ip(gz_info)
+    end)
+  end
+
+  def gather_internet_facing_ip(gz_info)
+    internet_facing_ip = nil
+    if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
+      internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
+        q.default = get_next_free_internet_facing_ip(gz_info)
+      end)
+    end
+    internet_facing_ip
+  end
+
+  def gather_alias
+    machine_alias = ask("Enter an Alias for this machine: (e.g. web)") do |q|
+      q.validate = /\A\w+\Z/
+      q.responses[:not_valid] = "Please enter a valid alias."
+    end
+  end
+
+  def gather_vm_hostname(machine_alias, gz_hostname)
+    domain = PublicSuffix.parse(gz_hostname).domain
+    hostname = ask("Enter a hostname for this machine:") do |q|
+      q.default = "#{machine_alias}.#{domain}"
+    end
+  end
+
+  def gather_memory_cap
+    memory_cap = ask("Maximum memory this machine should use?") do |q|
+      q.validate = /\A\d+(mb|gb)\z/i
+      q.default = '2GB'
+      q.case = :up
+    end
+  end
+
+  def gather_disk_cap
+    disk_cap = ask("Maximum disk space this machine should use?")  do |q| 
+      q.validate = /\A\d+(mb|gb)\z/i
+      q.default = '20GB'
+      q.case = :up
+    end
+  end
+
+  def gather_cpu_cores
+    cpu_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
+      q.default = 1
+    end
+  end
+
+  def gather_copy_ssh_key
+    copy_ssh_key = agree("Do you want to copy over your public SSH key to allow passwordless login?") do |q| 
+      q.default = 'yes'
     end
   end
 
