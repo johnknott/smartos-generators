@@ -186,34 +186,7 @@ class New < SmartOS::Generators::Command
 
     @res ||= get_available_images(gz_info)
 
-    # Suggest a few likely machine images.
-    # The most recent base64 and standard64 SmartOS datasets and the most recent Centos and Debian
-    # KVM images. The user can also drill down and choose an image from the entire collection of
-    # available datasets if they choose.
-
-    base64 = latest_of_type(@res, ->(name){name == 'base64'})
-    standard64 = latest_of_type(@res, ->(name){name == 'standard64'})
-    debian = latest_of_type(@res, ->(name){/debian.*/.match(name)})
-    centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
-
-    chosen = nil
-    say "Please choose the dataset to base the VM on:"
-     chosen = @console.choose do |menu|
-      menu.select_by = :index
-      menu.choice dataset_description(base64, '(Latest base64)') do base64 end
-      menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
-      menu.choice dataset_description(debian, '(Latest debian)') do debian end
-      menu.choice dataset_description(centos, '(Latest centos)') do centos end
-
-      menu.choice "Choose from all #{@res.length} Datasets" do
-        @console.choose do |menu|
-          @res.reverse_each do |dataset|
-            menu.select_by = :index
-            menu.choice dataset_description(dataset) do dataset end
-          end
-        end
-      end
-    end
+    chosen = gather_dataset
 
     # Gather an alias for this machine
     machine_alias = ask("Enter an Alias for this machine: (e.g. web)") do |q|
@@ -272,6 +245,39 @@ class New < SmartOS::Generators::Command
   end
 
   private
+
+  def gather_dataset
+
+    # Suggest a few likely machine images.
+    # The most recent base64 and standard64 SmartOS datasets and the most recent Centos and Debian
+    # KVM images. The user can also drill down and choose an image from the entire collection of
+    # available datasets if they choose.
+
+    base64 = latest_of_type(@res, ->(name){name == 'base64'})
+    standard64 = latest_of_type(@res, ->(name){name == 'standard64'})
+    debian = latest_of_type(@res, ->(name){/debian.*/.match(name)})
+    centos = latest_of_type(@res, ->(name){/centos.*/.match(name)})
+
+
+    say "Please choose the dataset to base the VM on:"
+    chosen = @console.choose do |menu|
+      menu.select_by = :index
+      menu.choice dataset_description(base64, '(Latest base64)') do base64 end
+      menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
+      menu.choice dataset_description(debian, '(Latest debian)') do debian end
+      menu.choice dataset_description(centos, '(Latest centos)') do centos end
+
+      menu.choice "Choose from all #{@res.length} Datasets" do
+        @console.choose do |menu|
+          @res.reverse_each do |dataset|
+            menu.select_by = :index
+            menu.choice dataset_description(dataset) do dataset end
+          end
+        end
+      end
+    end
+  end
+
   def dataset_description(dataset, note = nil)
     d = dataset['manifest']
     "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']} #{note.blue if note}"
