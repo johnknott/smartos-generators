@@ -40,6 +40,20 @@ module SmartOS
       def initialize
         @console = HighLine.new
       end
+
+      private
+
+      def ask(question, type = nil, &block)
+       @console.ask("\n#{question}", type, &block)
+      end
+
+      def agree(question, type = nil, &block)
+       @console.agree("\n#{question}", type, &block)
+      end
+
+      def say(str)
+       @console.say("#{str}")
+      end
     end
   end
 end
