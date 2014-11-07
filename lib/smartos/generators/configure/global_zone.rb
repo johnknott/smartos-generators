@@ -5,18 +5,7 @@ module SmartOS
       # Creates a new SmartOS Global Zone definition
       # @return [void]
       def new_global_zone(info = nil)
-        host_or_ip = nil
-
-        loop do
-          host_or_ip = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
-
-          info ||= SmartOS::GlobalZone.is_global_zone?(host_or_ip)
-          break if info
-          say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
-        end
-
-        say "Successfully connected to Global Zone #{host_or_ip}".green
-        say "#{info}".green
+        host_or_ip = gather_gz_hostname(info)
 
         # Gather information
         gz_info = GlobalZoneDefinition.new(
@@ -35,6 +24,12 @@ module SmartOS
           say "\nSkipping Machine definitions."
         end
 
+        print_hypervisor_summary(gz_info)
+
+        gz_info
+      end
+
+      def print_hypervisor_summary(gz_info)
         puts "Global Zone Information".blue
         puts "host: #{gz_info.gz_host}"
         puts "set hostname to: #{gz_info.hostname}"
@@ -49,8 +44,21 @@ module SmartOS
         end
 
         puts table
+      end
 
-        gz_info
+      def gather_gz_hostname(info)
+        host_or_ip = nil
+        loop do
+          host_or_ip = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
+
+          info ||= SmartOS::GlobalZone.is_global_zone?(host_or_ip)
+          break if info
+          say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
+        end
+
+        say "Successfully connected to Global Zone #{host_or_ip}".green
+        say "#{info}".green
+        host_or_ip
       end
 
       # Asks the user for a hostname and whether to set it when the GZ boots.
@@ -129,7 +137,7 @@ module SmartOS
       end
 
 
-        def get_next_free_internet_facing_ip(gz_info)
+      def get_next_free_internet_facing_ip(gz_info)
         already_allocated = gz_info.vm_definitions.map{|x|x.internet_facing_ip.to_s}
         gateway = gz_info.internet_net_range.address
         gz_info.internet_net_range.each_host do |h|
