@@ -46,18 +46,20 @@ module SmartOS
             menu.choice dataset_description(standard64, '(Latest standard64)') do standard64 end
             menu.choice dataset_description(debian, '(Latest debian)') do debian end
             menu.choice dataset_description(centos, '(Latest centos)') do centos end
+            add_other_options(menu)      
+          end
+      end
 
-            menu.choice "Choose from all #{@res.length} Datasets" do
-              @console.choose do |menu|
-                @res.reverse_each do |dataset|
-                  menu.select_by = :index
-                  menu.choice dataset_description(dataset) do dataset end
-                end
-              end
+      def add_other_options(menu)
+        menu.choice "Choose from all #{@res.length} Datasets" do
+          @console.choose do |menu|
+            @res.reverse_each do |dataset|
+              menu.select_by = :index
+              menu.choice dataset_description(dataset) do dataset end
             end
           end
         end
-
+      end
 
       def gather_pvn_ip(gz_info)
         IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
