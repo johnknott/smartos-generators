@@ -30,11 +30,19 @@ module SmartOS
       end
 
       def print_hypervisor_summary(gz_info)
+        print_gz_summary(gz_info)
+        print_vm_summary(gz_info)
+      end
+
+      def print_gz_summary(gz_info)
         puts "Global Zone Information".blue
         puts "host: #{gz_info.gz_host}"
         puts "set hostname to: #{gz_info.hostname}"
         puts "pvn net range: #{gz_info.pvn_net_range}"
         puts "Machine Definitions".blue
+      end
+
+      def print_vm_summary(gz_info)
         table = Terminal::Table.new do |t|
           t.headings = ['Alias', 'Hostname', 'Dataset', 'Version', 'Type', 'VLAN IP', 'Internet IP', 'Cores', 'Mem', 'Disk']
           gz_info.vm_definitions.each do |vm|
@@ -42,7 +50,6 @@ module SmartOS
                   vm.pvn_ip, vm.internet_facing_ip || 'None', vm.cpu_cores, vm.memory_cap, vm.disk_cap]
           end
         end
-
         puts table
       end
 
