@@ -20,6 +20,16 @@ describe "'smartos new' command" do
     newCommand.instance_variable_get(:@gz_info)
   end
 
+  it 'should exit when called with incorrect args' do
+    newCommand = New.new
+    expect { newCommand.perform(['asdasd','sdfsdf']) }.to raise_error
+  end
+
+  it 'should exit when called with a dir path that already exists' do
+    newCommand = New.new
+    expect { newCommand.perform(['.']) }.to raise_error
+  end
+
   it 'should configure a single virtual machine correctly when accepting defaults' do
     answers = [
       'gz.menu.directory',  # host or ip of global zone
