@@ -6,14 +6,18 @@ describe "'smartos new' command" do
     newCommand = New.new
     stdin_io = StringIO.new(answers.join("\n"))
     stdout_io = StringIO.new
-    stdin_io.rewind
     newCommand.console = HighLine.new(stdin_io, stdout_io)
-    stdout_io.rewind
-    stdout = stdout_io.to_a.select { |x|!x.strip.empty? }
-    puts stdout
     @imgadm_get_data ||= JSON.parse(File.read('spec/fixtures/imgadm-get.json'))
+    # Inject the mocks to bypass network activity
     newCommand.instance_variable_set(:@res, @imgadm_get_data)
-    newCommand.new_global_zone('SunOS gz.menu.directory 5.11 joyent_20140919T024804Z i86pc i386 i86pc')
+    newCommand.instance_variable_set(:@gz_uname_info, 'SunOS gz.menu.directory 5.11')
+    # Run the command
+    result = newCommand.perform(['gz-test'])
+    # stdout_io.rewind
+    # stdout = stdout_io.to_a.select { |x|!x.strip.empty? }
+    # puts stdout
+    # Extract the result
+    newCommand.instance_variable_get(:@gz_info)
   end
 
   it 'should configure a single virtual machine correctly when accepting defaults' do

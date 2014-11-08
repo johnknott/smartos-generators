@@ -24,8 +24,6 @@ class New < SmartOS::Generators::Command
         You can then create this infrastructure with the 'smartos up' command.
       eos
       ).strip_indent
-
-      on 'v', 'verbose', 'Enable verbose mode'
     end
 
     if args.size != 1
@@ -46,8 +44,7 @@ class New < SmartOS::Generators::Command
       exit
     end
 
-    gz_info = new_global_zone
-    say table
+    @gz_info = new_global_zone
 
     #system 'mkdir', '-p', path
     #say "Creating New SmartOS Infrastructure Project: #{name}".blue.bold

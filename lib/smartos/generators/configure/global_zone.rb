@@ -4,8 +4,8 @@ module SmartOS
 
       # Creates a new SmartOS Global Zone definition
       # @return [void]
-      def new_global_zone(info = nil)
-        host_or_ip = gather_gz_hostname(info)
+      def new_global_zone
+        host_or_ip = gather_gz_hostname
 
         # Gather information
         gz_info = GlobalZoneDefinition.new(
@@ -53,18 +53,18 @@ module SmartOS
         puts table
       end
 
-      def gather_gz_hostname(info)
+      def gather_gz_hostname
         host_or_ip = nil
         loop do
           host_or_ip = ask "Please enter the IP address or hostname of your SmartOS Global Zone:"
 
-          info ||= SmartOS::GlobalZone.is_global_zone?(host_or_ip)
-          break if info
+          @gz_uname_info ||= SmartOS::GlobalZone.is_global_zone?(host_or_ip)
+          break if @gz_uname_info
           say 'Not a valid SmartOS Global Zone hostname or IP address.'.red
         end
 
         say "Successfully connected to Global Zone #{host_or_ip}".green
-        say "#{info}".green
+        say "#{@gz_uname_info}".green
         host_or_ip
       end
 
