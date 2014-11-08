@@ -13,21 +13,13 @@ describe "'smartos new' command" do
     newCommand.instance_variable_set(:@gz_uname_info, 'SunOS gz.menu.directory 5.11')
     # Run the command
     result = newCommand.perform(['gz-test'])
-    # stdout_io.rewind
-    # stdout = stdout_io.to_a.select { |x|!x.strip.empty? }
-    # puts stdout
     # Extract the result
     newCommand.instance_variable_get(:@gz_info)
   end
 
-  it 'should exit when called with incorrect args' do
-    newCommand = New.new
-    expect { newCommand.perform(['asdasd','sdfsdf']) }.to raise_error
-  end
-
-  it 'should exit when called with a dir path that already exists' do
-    newCommand = New.new
-    expect { newCommand.perform(['.']) }.to raise_error
+  def puts_stdout(stdout_io)
+    stdout_io.rewind
+    puts stdout_io.to_a.select { |x|!x.strip.empty? }
   end
 
   it 'should configure a single virtual machine correctly when accepting defaults' do
@@ -68,7 +60,7 @@ describe "'smartos new' command" do
     expect(vmd.hostname).to eq('db.menu.directory')
     expect(vmd.pvn_ip).to eq(IPAddress.parse('10.0.0.2'))
     expect(vmd.internet_facing_ip).to eq(nil)
-    expect(vmd.memory_cap).to eq('2GB')
+    expect(vmd.memory_cap).to eq('4GB')
     expect(vmd.disk_cap).to eq('20GB')
     expect(vmd.cpu_cores).to eq(1)
     expect(vmd.copy_ssh_key).to eq(true)
@@ -212,6 +204,16 @@ describe "'smartos new' command" do
     expect(vmd.disk_cap).to eq('50GB')
     expect(vmd.cpu_cores).to eq(1)
     expect(vmd.copy_ssh_key).to eq(false)
+  end
+
+  it 'should exit when called with incorrect args' do
+    newCommand = New.new
+    expect { newCommand.perform(['asdasd','sdfsdf']) }.to raise_error
+  end
+
+  it 'should exit when called with a dir path that already exists' do
+    newCommand = New.new
+    expect { newCommand.perform(['.']) }.to raise_error
   end
 
 end

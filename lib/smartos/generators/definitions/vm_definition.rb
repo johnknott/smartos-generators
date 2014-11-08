@@ -1,4 +1,4 @@
-class MachineDefinition
+class VmDefinition
   attr_accessor :dataset, :machine_alias, :hostname, :memory_cap, :disk_cap, :cpu_cores, :copy_ssh_key,
                 :internet_facing_ip, :pvn_ip
 

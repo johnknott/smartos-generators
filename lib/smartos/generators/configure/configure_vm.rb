@@ -1,6 +1,6 @@
 module SmartOS
   module Configure
-    module VirtualMachine
+    module ConfigureVm
 
       def configure_virtual_machine(gz_info)
 
@@ -16,7 +16,7 @@ module SmartOS
         cpu_cores           = gather_cpu_cores
         copy_ssh_key        = gather_copy_ssh_key
 
-        MachineDefinition.new(
+        VmDefinition.new(
           chosen['manifest'],
           machine_alias,
           hostname,
@@ -94,7 +94,7 @@ module SmartOS
       def gather_memory_cap
         memory_cap = ask("Maximum memory this machine should use?") do |q|
           q.validate = /\A\d+(mb|gb)\z/i
-          q.default = '2GB'
+          q.default = '4GB'
           q.case = :up
         end
       end

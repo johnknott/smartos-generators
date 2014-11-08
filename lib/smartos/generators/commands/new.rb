@@ -1,9 +1,9 @@
+# @api private
 class New < SmartOS::Generators::Command
-  include SmartOS::Configure::VirtualMachine
-  include SmartOS::Configure::GlobalZone
+  include SmartOS::Configure::ConfigureVm
+  include SmartOS::Configure::ConfigureGz
 
-  # Creates a new SmartOS infrastructure project.
-  # Every Command must implement 'perform'.
+  # Creates a new SmartOS infrastructure project
   # @param args arguments to be parsed
   # @return [void]
   def perform(args)
@@ -34,7 +34,7 @@ class New < SmartOS::Generators::Command
     new_project(args.first)
   end
 
-  # Creates a new SmartOS infrastructure project.
+  # Creates a new SmartOS infrastructure project
   # @param name [String] String containing a name for the project.
   # @return [void]
   def new_project(name)
@@ -51,7 +51,7 @@ class New < SmartOS::Generators::Command
     #say "At path: #{path}".green
 
     say "You have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
-         "'smartos up' to build it!".blue
+         "'smartos up' to build it!".green
   end
 
 end

@@ -1,6 +1,6 @@
 module SmartOS
   module Configure
-    module GlobalZone
+    module ConfigureGz
 
       # Creates a new SmartOS Global Zone definition
       # @return [void]
@@ -8,7 +8,7 @@ module SmartOS
         host_or_ip = gather_gz_hostname
 
         # Gather information
-        gz_info = GlobalZoneDefinition.new(
+        gz_info = GzDefinition.new(
           host_or_ip,
           gather_hostname(host_or_ip),
           gather_pvn_vlan_details,
@@ -30,27 +30,46 @@ module SmartOS
       end
 
       def print_hypervisor_summary(gz_info)
+        puts "\nSummary of your virtual infrastructure:\n".blue.bold
         print_gz_summary(gz_info)
-        print_vm_summary(gz_info)
+        print_vm_summaries(gz_info)
       end
 
       def print_gz_summary(gz_info)
         puts "Global Zone Information".blue
-        puts "host: #{gz_info.gz_host}"
-        puts "set hostname to: #{gz_info.hostname}"
-        puts "pvn net range: #{gz_info.pvn_net_range}"
-        puts "Machine Definitions".blue
+        table = Terminal::Table.new do |t|
+          t << ['Host:', gz_info.gz_host]
+          t << ['Set hostname to:', gz_info.hostname]
+          t << ['PVN interface net range:', "#{gz_info.pvn_net_range}/#{gz_info.pvn_net_range.prefix}"]
+          t << ['Internet interface net range:', "#{gz_info.internet_net_range}/#{gz_info.internet_net_range.prefix}"]
+        end
+        puts table
       end
 
-      def print_vm_summary(gz_info)
+      def print_vm_summaries(gz_info)
+        puts "Machine Definitions".blue
         table = Terminal::Table.new do |t|
           t.headings = ['Alias', 'Hostname', 'Dataset', 'Version', 'Type', 'VLAN IP', 'Internet IP', 'Cores', 'Mem', 'Disk']
           gz_info.vm_definitions.each do |vm|
-            t << [vm.machine_alias, vm.hostname, vm.dataset['name'], vm.dataset['version'], vm.dataset['os'],
-                  vm.pvn_ip, vm.internet_facing_ip || 'None', vm.cpu_cores, vm.memory_cap, vm.disk_cap]
+            t << vm_summary_row(vm)
           end
         end
         puts table
+      end
+
+      def vm_summary_row(vm)
+        [
+          vm.machine_alias,
+          vm.hostname,
+          vm.dataset['name'],
+          vm.dataset['version'],
+          vm.dataset['os'],
+          vm.pvn_ip,
+          vm.internet_facing_ip || 'None',
+          vm.cpu_cores,
+          vm.memory_cap, 
+          vm.disk_cap
+        ]
       end
 
       def gather_gz_hostname
@@ -92,7 +111,7 @@ module SmartOS
         loop do
           answer = ask(
             "Please enter the IP range you'd like to set up your private virtual network in CIDR "\
-            "notation:"){ |q| q.default = '10.0.0.20/24'}
+            "notation:"){ |q| q.default = '10.10.10.0/24'}
           begin
             ip = IPAddress.parse(answer)
             if ip.prefix == 32
@@ -145,7 +164,7 @@ module SmartOS
 
       def get_next_free_ip(gz_info, net_range, ip)
         already_allocated = gz_info.vm_definitions.map{|x|x.send(ip).to_s}
-        gateway = gz_info.send(net_range).address
+        gateway = gz_info.send(net_range).first.address
         gz_info.send(net_range).each_host do |h|
           return h.to_s unless already_allocated.include?(h.to_s) || h.to_s == gateway
         end
