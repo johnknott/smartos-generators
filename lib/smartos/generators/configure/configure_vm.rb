@@ -94,6 +94,9 @@ module SmartOS
         end
       end
 
+      # Asks the user for a Memory Cap to use for this VM.
+      # If this is a SmartOS / Zone based VM, memory can be overprovisioned. If it is KVM it can't be.
+      # @return [String] String containing the memory cap for this VM in MB or GB. (e.g. '4GB' or '512MB')
       def gather_memory_cap
         memory_cap = ask("Maximum memory this machine should use?") do |q|
           q.validate = /\A\d+(mb|gb)\z/i
@@ -102,6 +105,8 @@ module SmartOS
         end
       end
 
+      # Asks the user for a Disk Cap / Quota to use for this VM.
+      # @return [String] String containing the disk cap for this VM in GB. (e.g. '20GB')
       def gather_disk_cap
         disk_cap = ask("Maximum disk space this machine should use?")  do |q| 
           q.validate = /\A\d+(mb|gb)\z/i
@@ -110,12 +115,17 @@ module SmartOS
         end
       end
 
+      # Asks the user for the numbers of CPU cores to use with this VM.
+      # @return [Integer] Integer containing the number of CPU cores to use with this VM.
       def gather_cpu_cores
         cpu_cores = ask("How many CPU cores should this machine use?", Integer) do |q|
           q.default = 1
         end
       end
 
+      # Asks the user whether to copy their SSH public key to this VMs authorized_hosts file to allow
+      # for passwordless authentication.
+      # @return [Boolean] Whether tocopy the users SSH public key to the VM.
       def gather_copy_ssh_key
         copy_ssh_key = agree("Do you want to copy over your public SSH key to allow passwordless login?") do |q| 
           q.default = 'yes'
