@@ -40,8 +40,8 @@ module SmartOS
         table = Terminal::Table.new do |t|
           t << ['Host:', gz_info.gz_host]
           t << ['Set hostname to:', gz_info.hostname]
-          t << ['PVN interface net range:', "#{gz_info.pvn_net_range}/#{gz_info.pvn_net_range.prefix}"]
-          t << ['Internet interface net range:', "#{gz_info.internet_net_range}/#{gz_info.internet_net_range.prefix}"]
+          t << ['PVN interface info:', "IP: #{gz_info.gz_pvn_ip} Range: #{gz_info.pvn_net_range}/#{gz_info.pvn_net_range.prefix}"]
+          t << ['Internet interface info:', "IP: #{gz_info.gz_internet_ip} Range:  #{gz_info.internet_net_range}/#{gz_info.internet_net_range.prefix}"]
         end
         puts table
       end

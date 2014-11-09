@@ -62,17 +62,25 @@ module SmartOS
       end
 
       def gather_pvn_ip(gz_info)
-        IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
-          q.default = get_next_free_pvn_ip(gz_info)
-        end)
+        ip = nil
+        loop do
+          ip = IPAddress.parse(ask("Please enter the PVN IP you want to use:") do |q|
+            q.default = get_next_free_pvn_ip(gz_info)
+          end)
+          break if ip.ipv4?
+        end
+        ip
       end
 
       def gather_internet_facing_ip(gz_info)
         internet_facing_ip = nil
         if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
-          internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
-            q.default = get_next_free_internet_facing_ip(gz_info)
-          end)
+          loop do
+            internet_facing_ip = IPAddress.parse(ask("Please enter the internet facing IP you want to use:") do |q|
+              q.default = get_next_free_internet_facing_ip(gz_info)
+            end)
+            break if internet_facing_ip.ipv4?
+          end
         end
         internet_facing_ip
       end
