@@ -27,7 +27,7 @@ class VmDefinition
   # @param pvn_ip [String] IP Address of the PVN Interface on this machine
   # @param memory_cap [String] Memory Cap for this machine. Can be overprovisioned for Zones, not so for KVM. (e.g. 4GB)
   # @param disk_cap [String] Disk Cap for this machine. Can be overprovisioned. (e.g. 20GB)
-  # @param copy_ssh_key [Boolean] Whether to copy over the deploying machines SSH public key to this machine/
+  # @param copy_ssh_key [Boolean] Whether to copy over the deploying machines SSH public key to this machine.
   def initialize(dataset, machine_alias, hostname, pvn_ip,
                 internet_facing_ip: nil, memory_cap: nil, disk_cap: nil, cpu_cores: nil, copy_ssh_key: nil)
     # Loop through all parameters and set instance variables

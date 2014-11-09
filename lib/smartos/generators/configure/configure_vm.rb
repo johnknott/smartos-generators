@@ -15,7 +15,7 @@ module SmartOS
         disk_cap            = gather_disk_cap
         cpu_cores           = gather_cpu_cores
         copy_ssh_key        = gather_copy_ssh_key
-        
+
         VmDefinition.new(
           chosen['manifest'],
           machine_alias,
@@ -28,6 +28,12 @@ module SmartOS
           internet_facing_ip: internet_facing_ip)
       end
 
+      private
+
+      # Asks the user to choose a dataset to use to create the VM. This can be any brand (Zone, KVM, LX ...).
+      # It prioritizes thelatest base64 and standard64 SmartOS datasets (Zones), and Debian and CentOS datasets (KVM).
+      # The user also has the choice to pick from any of the many other available datasets.
+      # @return [Hash] Hash containing the manifest of the chosen image dataset.
       def gather_dataset
           # Suggest a few likely machine images.
           # The most recent base64 and standard64 SmartOS datasets and the most recent Centos and Debian
@@ -50,34 +56,8 @@ module SmartOS
           end
       end
 
-      def add_other_options(menu)
-        menu.choice "Choose from all #{@res.length} Datasets" do
-          @console.choose do |menu|
-            @res.reverse_each do |dataset|
-              menu.select_by = :index
-              menu.choice dataset_description(dataset) do dataset end
-            end
-          end
-        end
-      end
-
-      def gather_ip(message, func, gz_info)
-        loop do
-          ip = IPAddress.parse(ask(message){ |q| q.default = send(func, gz_info)})
-          return ip if ip.ipv4?
-        end
-      end
-
-      def gather_pvn_ip(gz_info)
-        gather_ip("Please enter the PVN IP you want to use:", :get_next_free_pvn_ip, gz_info)
-      end
-
-      def gather_internet_facing_ip(gz_info)
-        if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
-          gather_ip("Please enter the internet facing IP you want to use:", :get_next_free_internet_facing_ip, gz_info)
-        end
-      end
-
+      # Asks the user for an alias for the virtual machine. (e.g. web)
+      # @return [String] String containing the users chosen alias for the virtual machine.
       def gather_alias
         machine_alias = ask("Enter an Alias for this machine: (e.g. web)") do |q|
           q.validate = /\A\w+\Z/
@@ -85,10 +65,32 @@ module SmartOS
         end
       end
 
+      # Asks the user for a hostname for the virtual machine.
+      # The default answer will be prepopulated with alias.gz_hostname. (e.g. web.example.com)
+      # @return [String] String containing the users chosen hostname for the virtual machine.
       def gather_vm_hostname(machine_alias, gz_hostname)
         domain = PublicSuffix.parse(gz_hostname).domain
         hostname = ask("Enter a hostname for this machine:") do |q|
           q.default = "#{machine_alias}.#{domain}"
+        end
+      end
+
+      # Asks the user to choose an IP for the PVN interface.
+      # The default answer will be prepopulated with the next available IP from the PVN net
+      # range the user chose when configuring the Global Zone. (e.g. 10.10.10.2)
+      # @return [IPAddress] IPAddress containing the users chosen IP for the PVN interface.
+      def gather_pvn_ip(gz_info)
+        gather_ip("Please enter the PVN IP you want to use:", :get_next_free_pvn_ip, gz_info)
+      end
+
+      # Asks the user whether this machine needs an interface bound to the Internet and if so to
+      # choose an IP for that interface.
+      # The default answer will be prepopulated with the next available IP from the Internet net
+      # range the user chose when configuring the Global Zone. (e.g. 153.32.32.122)
+      # @return [IPAddress] IPAddress containing the users chosen IP for the Internet interface.
+      def gather_internet_facing_ip(gz_info)
+        if agree("Does this machine need an Internet facing IP address?"){ |q| q.default = 'no'}
+          gather_ip("Please enter the internet facing IP you want to use:", :get_next_free_internet_facing_ip, gz_info)
         end
       end
 
@@ -120,20 +122,39 @@ module SmartOS
         end
       end
 
-      def dataset_description(dataset, note = nil)
-        d = dataset['manifest']
-        "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']} #{note.blue if note}"
+      def get_available_images(gz_info)
+        SmartOS::GlobalZone.connect(gz_info.gz_host) do
+          imgadm!('avail -j')
+        end
       end
 
       def latest_of_type(res, proc)
         res.select{|dataset| proc.call(dataset['manifest']['name']) }.first
       end
 
-      def get_available_images(gz_info)
-        SmartOS::GlobalZone.connect(gz_info.gz_host) do
-          imgadm!('avail -j')
+      def dataset_description(dataset, note = nil)
+        d = dataset['manifest']
+        "#{d['uuid']} #{'%23s' % d['name']}#{'%17s' % d['version']}#{'%10s' % d['os']} #{note.blue if note}"
+      end
+
+      def gather_ip(message, func, gz_info)
+        loop do
+          ip = IPAddress.parse(ask(message){ |q| q.default = send(func, gz_info)})
+          return ip if ip.ipv4?
         end
       end
+
+      def add_other_options(menu)
+        menu.choice "Choose from all #{@res.length} Datasets" do
+          @console.choose do |menu|
+            @res.reverse_each do |dataset|
+              menu.select_by = :index
+              menu.choice dataset_description(dataset) do dataset end
+            end
+          end
+        end
+      end
+
 
     end
   end
