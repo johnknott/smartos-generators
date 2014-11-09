@@ -15,7 +15,7 @@ module SmartOS
         disk_cap            = gather_disk_cap
         cpu_cores           = gather_cpu_cores
         copy_ssh_key        = gather_copy_ssh_key
-
+        
         VmDefinition.new(
           chosen['manifest'],
           machine_alias,
