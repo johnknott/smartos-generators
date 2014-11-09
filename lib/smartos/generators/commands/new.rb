@@ -1,4 +1,4 @@
-# @api private
+# Class to handle 'smartos new <name>' command
 class New < SmartOS::Generators::Command
   include SmartOS::Configure::ConfigureVm
   include SmartOS::Configure::ConfigureGz
