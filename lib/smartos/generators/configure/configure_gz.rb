@@ -15,35 +15,15 @@ module SmartOS
           gather_internet_vlan_details,
           gather_repository)
 
-        if agree("Do you want to create your Virtual Machine definitions now?"){ |q| q.default = 'yes'}
-          loop do
-            gz_info.vm_definitions << configure_virtual_machine(gz_info)
-            break unless agree("Finished configuring this VM. Add another?"){ |q| q.default = 'yes'}
-          end
-        else
-          say "\nSkipping Machine definitions."
-        end
-
-        print_hypervisor_summary(gz_info)
+        gz_info.print_gz_summary
 
         gz_info
       end
 
       def print_hypervisor_summary(gz_info)
         puts "\nSummary of your virtual infrastructure:\n".blue.bold
-        print_gz_summary(gz_info)
+        gz_info.print_gz_summary
         print_vm_summaries(gz_info)
-      end
-
-      def print_gz_summary(gz_info)
-        puts "Global Zone Information".blue
-        table = Terminal::Table.new do |t|
-          t << ['Host:', gz_info.gz_host]
-          t << ['Set hostname to:', gz_info.hostname]
-          t << ['PVN interface info:', "IP: #{gz_info.gz_pvn_ip} Range: #{gz_info.pvn_net_range}/#{gz_info.pvn_net_range.prefix}"]
-          t << ['Internet interface info:', "IP: #{gz_info.gz_internet_ip} Range:  #{gz_info.internet_net_range}/#{gz_info.internet_net_range.prefix}"]
-        end
-        puts table
       end
 
       def print_vm_summaries(gz_info)

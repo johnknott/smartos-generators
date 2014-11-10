@@ -125,7 +125,7 @@ module SmartOS
 
       # Asks the user whether to copy their SSH public key to this VMs authorized_hosts file to allow
       # for passwordless authentication.
-      # @return [Boolean] Whether tocopy the users SSH public key to the VM.
+      # @return [Boolean] Whether to copy the users SSH public key to the VM.
       def gather_copy_ssh_key
         copy_ssh_key = agree("Do you want to copy over your public SSH key to allow passwordless login?") do |q| 
           q.default = 'yes'

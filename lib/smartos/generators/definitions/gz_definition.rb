@@ -34,4 +34,15 @@ class GzDefinition
     @gz_internet_ip = IPAddress.parse(@internet_net_range.first.address)
   end
 
+  def print_gz_summary
+    puts "Global Zone Information".blue
+    table = Terminal::Table.new do |t|
+      t << ['Host:', gz_host]
+      t << ['Set hostname to:', hostname]
+      t << ['PVN interface info:', "IP: #{gz_pvn_ip} Range: #{pvn_net_range}/#{pvn_net_range.prefix}"]
+      t << ['Internet interface info:', "IP: #{gz_internet_ip} Range:  #{internet_net_range}/#{internet_net_range.prefix}"]
+    end
+    puts table
+  end
+
 end

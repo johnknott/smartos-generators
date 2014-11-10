@@ -1,6 +1,5 @@
 # Class to handle 'smartos new <name>' command
 class New < SmartOS::Generators::Command
-  include SmartOS::Configure::ConfigureVm
   include SmartOS::Configure::ConfigureGz
 
   # Creates a new SmartOS infrastructure project
@@ -15,13 +14,10 @@ class New < SmartOS::Generators::Command
       Description:
         Creates a new SmartOS virtual infrastructure project.
 
-        Asks some questions about the specifications of the machines you want to be created and the
-        topology of your network and then creates configuration files and JSON machine definitions
-        automatically from templates.
+        Asks some questions about the topology of your network and then creates configuration
+        files to prepare your Global Zone. After this command has run, use 'smartos generate'
+        to generate VM definitions. And finally, run 'smartos up' to actaully create your VMs.
 
-        This command can also help configure a VPN using OpenVPN and generate configuration files.
-
-        You can then create this infrastructure with the 'smartos up' command.
       eos
       ).strip_indent
     end

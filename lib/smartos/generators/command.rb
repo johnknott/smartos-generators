@@ -22,7 +22,8 @@ module SmartOS
         smartos <command> --help
 
       Commands:
-        up                  # Create and configure machines you have defined in your project.
+        generate            # Defines VMs within your project.
+        up                  # Create VMs you have defined in your project.
         down                # Destroy all or part of your infrastructure.
         console             # Start an interactive ruby console in the context of a Global Zone.
         wizard              # Start the wizard tool. Useful for one off tasks such as migrating VMs.
