@@ -4,7 +4,7 @@
 
 # Smartos::Generators
 
-TODO: Write a gem description
+TODO: Write a gem description.
 
 ## Installation
 
