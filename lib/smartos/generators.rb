@@ -1,5 +1,6 @@
 require 'slop'
 require 'pry'
+require 'yaml'
 require 'colorize'
 require 'highline'
 require 'ipaddress'

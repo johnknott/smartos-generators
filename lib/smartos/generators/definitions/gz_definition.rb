@@ -48,7 +48,18 @@ class GzDefinition
   def serialize(path)
     FileUtils.mkdir_p path 
     puts "Creating New SmartOS Infrastructure Project: #{path}".blue.bold
-    binding.pry
+    Dir.chdir(path) do
+      data = {
+        gz_host:  gz_host,
+        hostname: hostname,
+        pvn_net_range: "#{pvn_net_range.address}/#{pvn_net_range.prefix}",
+        internet_net_range: "#{internet_net_range.address}/#{internet_net_range.prefix}",
+        dataset_repository: dataset_repository,
+        gz_pvn_ip: gz_pvn_ip.address,
+        gz_internet_ip: gz_internet_ip.address
+      }
+      File.open("SmartOSfile", "w") {|f| f.write(data.to_yaml) }
+    end
   end
 
   def deserialize
