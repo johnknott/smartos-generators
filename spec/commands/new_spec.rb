@@ -3,6 +3,7 @@ require 'spec_helper'
 describe "'smartos new' command" do
 
   def new_global_zone_from_answers(answers)
+    # Fake the file system
     FakeFS.activate!
     newCommand = New.new
     stdin_io = StringIO.new(answers.join("\n") + "\n")
@@ -12,6 +13,7 @@ describe "'smartos new' command" do
     newCommand.instance_variable_set(:@gz_uname_info, 'SunOS gz.menu.directory 5.11')
     # Run the command
     result = newCommand.perform(['gz-test'])
+    # Unfake the file system
     FakeFS.deactivate!
     # Extract the result
     newCommand.instance_variable_get(:@gz_info)
