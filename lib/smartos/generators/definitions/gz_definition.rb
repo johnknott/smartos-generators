@@ -48,6 +48,7 @@ class GzDefinition
   def serialize(path)
     FileUtils.mkdir_p path 
     puts "Creating New SmartOS Infrastructure Project: #{path}".blue.bold
+    binding.pry
   end
 
   def deserialize
