@@ -31,14 +31,12 @@ class Generate < SmartOS::Generators::Command
   end
 
   # Creates a new Virtual Machine definition
-  # @param name [String] String containing the alias for the VM
+  # @param name [String] Alias to be used for the VM
   # @return [void]
-  def new_project(name)
-    path = File.expand_path(name)
-    if Dir.exist?(path)
-      say "#{path} already exists. Please choose a directory name that doesn't already exist.".red
-      exit
-    end
+  def new_vm(name)
+    
+    # load settings
+    #configure_virtual_machine()
 
     @gz_info = new_global_zone
 

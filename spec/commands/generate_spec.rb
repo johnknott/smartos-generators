@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "'smartos generate' command" do
 
-  def new_virtual_machine_from_answers(answers)
+  def new_virtual_machine_from_answers(name, answers)
     generateCommand = Generate.new
     stdin_io = StringIO.new(answers.join("\n") + "\n")
     stdout_io = StringIO.new
@@ -13,7 +13,7 @@ describe "'smartos generate' command" do
     generateCommand.instance_variable_set(:@gz_uname_info, 'SunOS gz.menu.directory 5.11')
     # Run the command
     result = generateCommand.perform(['gz-test'])
-    puts_stdout(stdout_io)
+    #puts_stdout(stdout_io)
     # Extract the result
     generateCommand.instance_variable_get(:@gz_info)
   end
@@ -26,7 +26,6 @@ describe "'smartos generate' command" do
   xit 'should configure a single virtual machine correctly when accepting defaults' do
     answers = [
       '2',                  # dataset
-      'db',                 # alias
       '',                   # hostname (defaults to db.menu.directory)
       '',                   # PVN IP (defaults to 10.0.0.2)
       '',                   # internet facing interface? (defaults to no)
@@ -36,7 +35,7 @@ describe "'smartos generate' command" do
       '',                   # copy ssh key (defaults to yes)
     ]
 
-    result = new_virtual_machine_from_answers(answers)
+    result = new_virtual_machine_from_answers('db', answers)
   
 =begin
     expect(result.vm_definitions.size).to eq(1)
@@ -182,14 +181,14 @@ describe "'smartos generate' command" do
 =end
   end
 
-  xit 'should exit when called with incorrect args' do
-    newCommand = New.new
-    expect { newCommand.perform(['asdasd','sdfsdf']) }.to raise_error
+  it 'should exit when called with incorrect args' do
+    generateCommand = Generate.new
+    expect { generateCommand.perform(['asdasd','sdfsdf']) }.to raise_error
   end
 
-  xit 'should exit when called with a dir path that already exists' do
-    newCommand = New.new
-    expect { newCommand.perform(['.']) }.to raise_error
+  it 'should exit when called with a dir path that already exists' do
+    generateCommand = Generate.new
+    expect { generateCommand.perform(['.']) }.to raise_error
   end
 
 end

@@ -45,4 +45,12 @@ class GzDefinition
     puts table
   end
 
+  def serialize(path)
+    system 'mkdir', '-p', path
+    puts "Creating New SmartOS Infrastructure Project: #{path}".blue.bold
+  end
+
+  def deserialize
+  end
+
 end

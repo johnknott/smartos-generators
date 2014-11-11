@@ -8,6 +8,7 @@ Bundler.setup
 require 'smartos'
 require 'highline/test'
 require 'rspec/expectations'
+require 'fakefs/safe'
 require_relative '../lib/smartos/generators'
 
 RSpec.configure do |_config|

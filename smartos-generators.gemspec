@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "codeclimate-test-reporter"
   spec.add_development_dependency "dotenv"
   spec.add_development_dependency "yard"
+  spec.add_development_dependency "fakefs"
 
   spec.add_dependency 'slop'
   spec.add_dependency 'highline'

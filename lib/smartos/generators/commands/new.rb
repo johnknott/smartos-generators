@@ -41,10 +41,7 @@ class New < SmartOS::Generators::Command
     end
 
     @gz_info = new_global_zone
-
-    #system 'mkdir', '-p', path
-    #say "Creating New SmartOS Infrastructure Project: #{name}".blue.bold
-    #say "At path: #{path}".green
+    @gz_info.serialize(path)
 
     say "You have now configured your SmartOS virtual infrastructure. Inspect it, then run "\
          "'smartos up' to build it!".green
